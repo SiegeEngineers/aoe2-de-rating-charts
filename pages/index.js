@@ -78,7 +78,6 @@ export async function getStaticProps(context) {
 
                 let dataResponse = await got(`https://aoe2.net/api/leaderboard?game=aoe2de&leaderboard_id=3&start=${startIndex}&count=${API_CALL_CHUNK_SIZE}`).json();
                 leaderboard = leaderboard.concat(dataResponse.leaderboard);
-                console.log("Leaderboard",leaderboard.length);
 
                 // Wait a litte bit before we make the next api call
                 await new Promise(r => setTimeout(r, API_CALL_DELAY_IN_MS));
