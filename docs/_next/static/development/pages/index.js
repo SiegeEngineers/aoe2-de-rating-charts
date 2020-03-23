@@ -310,29 +310,49 @@ var _default = /*#__PURE__*/function (_Component) {
     value: function componentDidMount() {
       var histogramArray = this.props.histogram;
       var timestamp = this.props.timestamp ? this.props.timestamp : 0;
-      google.charts.load("current", {
-        packages: ["corechart"]
-      });
-      google.charts.setOnLoadCallback(drawChart);
+      var x = [];
 
-      function drawChart() {
-        var data = google.visualization.arrayToDataTable(histogramArray);
-        var options = {
-          title: 'Age of Empires II: Definitive Edition ELO (1v1 random map)',
-          legend: {
-            position: 'none'
-          },
-          hAxis: {
-            title: 'Rating'
-          },
-          vAxis: {
-            title: 'Number of Players'
-          }
-        };
-        var chart = new google.visualization.Histogram(document.getElementById('chart_div'));
-        chart.draw(data, options);
+      for (var i = 0; i < histogramArray.length; i++) {
+        x[i] = histogramArray[i][1];
       }
 
+      var trace = {
+        x: x,
+        type: 'histogram'
+      };
+      var layout = {
+        title: {
+          text: 'Age of Empires II: Definitive Edition Ratings<br>1v1 random map',
+          font: {
+            family: 'Courier New, monospace',
+            size: 24
+          },
+          xref: 'paper',
+          x: 0.05
+        },
+        xaxis: {
+          title: {
+            text: 'Rating',
+            font: {
+              family: 'Courier New, monospace',
+              size: 18,
+              color: '#7f7f7f'
+            }
+          }
+        },
+        yaxis: {
+          title: {
+            text: 'Number of Players',
+            font: {
+              family: 'Courier New, monospace',
+              size: 18,
+              color: '#7f7f7f'
+            }
+          }
+        }
+      };
+      var data = [trace];
+      Plotly.newPlot('chart_div', data, layout);
       var lastUpdatedDiv = document.getElementById("last_updated");
       lastUpdatedDiv.textContent = "Last updated: ".concat(new Date(timestamp));
     }
@@ -343,30 +363,30 @@ var _default = /*#__PURE__*/function (_Component) {
         __self: this,
         __source: {
           fileName: _jsxFileName,
-          lineNumber: 38,
+          lineNumber: 62,
           columnNumber: 9
         }
       }, __jsx("head", {
         __self: this,
         __source: {
           fileName: _jsxFileName,
-          lineNumber: 39,
+          lineNumber: 63,
           columnNumber: 13
         }
       }, __jsx("script", {
         type: "text/javascript",
-        src: "https://www.gstatic.com/charts/loader.js",
+        src: "https://cdn.plot.ly/plotly-latest.min.js",
         __self: this,
         __source: {
           fileName: _jsxFileName,
-          lineNumber: 40,
+          lineNumber: 64,
           columnNumber: 13
         }
       })), __jsx("body", {
         __self: this,
         __source: {
           fileName: _jsxFileName,
-          lineNumber: 42,
+          lineNumber: 66,
           columnNumber: 13
         }
       }, __jsx("div", {
@@ -378,7 +398,7 @@ var _default = /*#__PURE__*/function (_Component) {
         __self: this,
         __source: {
           fileName: _jsxFileName,
-          lineNumber: 43,
+          lineNumber: 67,
           columnNumber: 13
         }
       }), __jsx("div", {
@@ -386,7 +406,7 @@ var _default = /*#__PURE__*/function (_Component) {
         __self: this,
         __source: {
           fileName: _jsxFileName,
-          lineNumber: 44,
+          lineNumber: 68,
           columnNumber: 13
         }
       }), __jsx("div", {
@@ -394,7 +414,7 @@ var _default = /*#__PURE__*/function (_Component) {
         __self: this,
         __source: {
           fileName: _jsxFileName,
-          lineNumber: 45,
+          lineNumber: 69,
           columnNumber: 13
         }
       }, "Source code on ", __jsx("a", {
@@ -402,7 +422,7 @@ var _default = /*#__PURE__*/function (_Component) {
         __self: this,
         __source: {
           fileName: _jsxFileName,
-          lineNumber: 46,
+          lineNumber: 70,
           columnNumber: 32
         }
       }, "Github"))));
@@ -422,7 +442,7 @@ var __N_SSG = true;
 
 /***/ }),
 
-/***/ 2:
+/***/ 1:
 /*!***************************************************************************************************************************!*\
   !*** multi next-client-pages-loader?page=%2F&absolutePagePath=D%3A%5CgitRepos%5Caoe2-de-elo-histogram%5Cpages%5Cindex.js ***!
   \***************************************************************************************************************************/
@@ -445,5 +465,5 @@ module.exports = dll_2adc2403d89adc16ead0;
 
 /***/ })
 
-},[[2,"static/runtime/webpack.js"]]]);
+},[[1,"static/runtime/webpack.js"]]]);
 //# sourceMappingURL=index.js.map

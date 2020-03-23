@@ -9,25 +9,49 @@ export default class extends Component {
   componentDidMount() {
     let histogramArray = this.props.histogram;
     let timestamp = this.props.timestamp ? this.props.timestamp : 0;
-    google.charts.load("current", {packages:["corechart"]});
-    google.charts.setOnLoadCallback(drawChart);
-    function drawChart() {
-      var data = google.visualization.arrayToDataTable(histogramArray);
-
-      var options = {
-        title: 'Age of Empires II: Definitive Edition Rating Distribution (1v1 random map)',
-        legend: { position: 'none' },
-        hAxis: {
-            title: 'Rating'
-        },
-        vAxis: {
-            title: 'Number of Players'
-        }, 
-      };
-
-      var chart = new google.visualization.Histogram(document.getElementById('chart_div'));
-      chart.draw(data, options);
+    var x = [];
+    for (var i = 0; i < histogramArray.length; i++) {
+        x[i] = histogramArray[i][1];
     }
+
+    var trace = {
+        x: x,
+        type: 'histogram'
+    }
+
+    var layout = {
+    title: {
+        text:'Age of Empires II: Definitive Edition Ratings<br>1v1 random map',
+        font: {
+        family: 'Courier New, monospace',
+        size: 24
+        },
+        xref: 'paper',
+        x: 0.05,
+    },
+    xaxis: {
+        title: {
+        text: 'Rating',
+        font: {
+            family: 'Courier New, monospace',
+            size: 18,
+            color: '#7f7f7f'
+        }
+        },
+    },
+    yaxis: {
+        title: {
+        text: 'Number of Players',
+        font: {
+            family: 'Courier New, monospace',
+            size: 18,
+            color: '#7f7f7f'
+        }
+        }
+    }
+    };
+    var data = [trace];
+    Plotly.newPlot('chart_div', data, layout);
 
     let lastUpdatedDiv = document.getElementById("last_updated");
     lastUpdatedDiv.textContent = `Last updated: ${new Date(timestamp)}`;
@@ -37,7 +61,7 @@ export default class extends Component {
     return (
         <html>
             <head>
-            <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+            <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
             </head>
             <body>
             <div id="chart_div" style={{width: "900px", height: "500px"}}></div>
@@ -110,8 +134,8 @@ export async function getStaticProps(context) {
             updatedTime = Math.floor(new Date()/1000);
         }
 
-        // Format the data so Google Charts can comsume it
-        let histogramData = [['Player Name', 'Rating']];
+        // Format the data
+        let histogramData = [];
         for(let i = 0; i < leaderboard.length; i++) {
             let name = leaderboard[i].name;
             let rating = leaderboard[i].rating;

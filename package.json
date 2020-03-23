@@ -8,7 +8,7 @@
     "build": "next build",
     "export": "next export -o docs",
     "start": "next start",
-    "deploy": "git subtree push --prefix out origin gh-pages"
+    "pages": "next build & next export -o docs"
   },
   "repository": {
     "type": "git",
