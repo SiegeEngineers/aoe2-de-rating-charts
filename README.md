@@ -7,18 +7,29 @@
 
 # Dev
 
+`npm install`
 `npm run dev`
 
-# Production Build
+# Deployment
+
+Generate static site
 
 `npm run build && npm run export`
 
 The site is exported to `/out`.
 
-You can see the production static app using any webserver.
+Delete the exisiting gh-pages branch and push the contents of the ./out directory to a new gh-pages branch
+`git push origin :gh-pages && git subtree push --prefix out origin gh-pages`
+
+# Testing the production build
+
+To make this work, you'll have to replace the references to "aoe2-de-elo-histogram" in env-config.js and next.config.js with "" (blank)
+
+After that, you can see the production static app using a webserver.
 
 For example:
-1. Install web server globally, you only need to do this once `npm install -g serve`
+1. Install serve globally, you only need to do this once `npm install -g serve`
 1. Navigate the the site's root directory `cd ./out`
 1. Serve the site `serve -p 8080`
 1. Visit `localhost:8080` in your browser
+

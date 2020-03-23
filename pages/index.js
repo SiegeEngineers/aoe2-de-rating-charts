@@ -15,8 +15,14 @@ export default class extends Component {
       var data = google.visualization.arrayToDataTable(histogramArray);
 
       var options = {
-        title: 'Age of Empires II: Definitive Edition ELO (1v1 random map)',
+        title: 'Age of Empires II: Definitive Edition Rating Distribution (1v1 random map)',
         legend: { position: 'none' },
+        hAxis: {
+            title: 'Rating'
+        },
+        vAxis: {
+            title: 'Number of Players'
+        }, 
       };
 
       var chart = new google.visualization.Histogram(document.getElementById('chart_div'));
@@ -36,6 +42,9 @@ export default class extends Component {
             <body>
             <div id="chart_div" style={{width: "900px", height: "500px"}}></div>
             <div id="last_updated"></div>
+            <div id="github_footer">
+                Source code on <a href="https://github.com/thbrown/aoe2-de-elo-histogram">Github</a>  
+            </div>
             </body>
         </html>
     )
@@ -43,7 +52,8 @@ export default class extends Component {
 }
 
 //const NUMBER_OF_BUCKETS = 100;
-const CACHE_FILE_PATH = "cache/apiCache.json";
+const CACHE_DIRECTORY = "cache/";
+const CACHE_FILE_PATH = CACHE_DIRECTORY + "apiCache.json";
 const CACHE_EXPIRATION_IN_HOURS = 23; // Change this to 0 to bypass cache
 const API_CALL_CHUNK_SIZE = 1000;
 const API_CALL_DELAY_IN_MS = 2000;
@@ -86,6 +96,9 @@ export async function getStaticProps(context) {
             console.log("Leaderboard length", leaderboard.length);
 
             // Write the result to the file system cache so we don't have to make the api call each time we build
+            if (!fs.existsSync(CACHE_DIRECTORY)){
+                fs.mkdirSync(CACHE_DIRECTORY);
+            }
             fs.writeFile(CACHE_FILE_PATH, JSON.stringify(leaderboard), function (err) {
                 if (err) {
                     console.log("Error writing API cache file");
@@ -98,7 +111,7 @@ export async function getStaticProps(context) {
         }
 
         // Format the data so Google Charts can comsume it
-        let histogramData = [['Player Name', 'ELO']];
+        let histogramData = [['Player Name', 'Rating']];
         for(let i = 0; i < leaderboard.length; i++) {
             let name = leaderboard[i].name;
             let rating = leaderboard[i].rating;
