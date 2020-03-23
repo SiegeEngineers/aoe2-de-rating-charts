@@ -12,14 +12,14 @@ Hosted on github pages (https://pages.github.com/)
 # Production Build
 
 `npm run build`
-`npm run export`
+`npm run export -o docs`
 
-The site is exported to `/out`
+The site is exported to `/docs` for easy compatibility with github pages.
 
 You can see the production static app using any webserver.
 
 For example:
 1. Install web server globally, you only need to do this once `npm install -g serve`
-1. Navigate the the site's root directory `cd ./out`
+1. Navigate the the site's root directory `cd ./docs`
 1. Serve the site `serve -p 8080`
 1. Visit `localhost:8080` in your browser
