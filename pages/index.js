@@ -59,7 +59,7 @@ export async function getStaticProps(context) {
 
         // Get the data -- If this API call has been cached in the last CACHE_EXPIRATION_IN_HOURS hours use the cached file
         if(fs.existsSync(CACHE_FILE_PATH) && Date.now() - fs.statSync(CACHE_FILE_PATH).mtimeMs < CACHE_EXPIRATION_IN_HOURS * 60 * 60 * 1000) {
-            console.log("Using cache to avoid API call to aoe2.net...");
+            console.log("Using cache to avoid API calls to aoe2.net...");
             leaderboard = JSON.parse(fs.readFileSync(CACHE_FILE_PATH, 'utf8'));
             updatedTime = fs.statSync(CACHE_FILE_PATH).mtimeMs;
         } else {
@@ -106,8 +106,8 @@ export async function getStaticProps(context) {
             histogramData.push([name, rating]);
         }
 
-        console.log("Number of players", histogramData.length);
-
+        console.log("Number of ranked players", histogramData.length);
+        console.log("The next step may take a few minutes depending on the number of players...")
 
         // will be passed to the page component as props
         return {
