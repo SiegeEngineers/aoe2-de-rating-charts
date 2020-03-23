@@ -7,7 +7,8 @@
     "dev": "next",
     "build": "next build",
     "export": "next export",
-    "start": "next start"
+    "start": "next start",
+    "deploy": "git subtree push --prefix out origin gh-pages"
   },
   "repository": {
     "type": "git",
