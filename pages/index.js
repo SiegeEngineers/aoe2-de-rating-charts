@@ -7,7 +7,6 @@ export default class extends Component {
   state = { }
 
   componentDidMount() {
-    console.log(this.props.histogram);
     let histogramArray = this.props.histogram;
     let timestamp = this.props.timestamp ? this.props.timestamp : 0;
     google.charts.load("current", {packages:["corechart"]});
@@ -16,8 +15,7 @@ export default class extends Component {
       var data = google.visualization.arrayToDataTable(histogramArray);
 
       var options = {
-        title: 'Age of Empires II: Definitive Edition ELO',
-        subtitle: '1v1 Random Map',
+        title: 'Age of Empires II: Definitive Edition ELO (1v1 random map)',
         legend: { position: 'none' },
       };
 
@@ -27,7 +25,6 @@ export default class extends Component {
 
     let lastUpdatedDiv = document.getElementById("last_updated");
     lastUpdatedDiv.textContent = `Last updated: ${new Date(timestamp)}`;
-
   }
 
   render() {
@@ -45,7 +42,7 @@ export default class extends Component {
   }
 }
 
-const NUMBER_OF_BUCKETS = 100;
+//const NUMBER_OF_BUCKETS = 100;
 const CACHE_FILE_PATH = "cache/apiCache.json";
 const CACHE_EXPIRATION_IN_HOURS = 23; // Change this to 0 to bypass cache
 const API_CALL_CHUNK_SIZE = 1000;
@@ -100,39 +97,6 @@ export async function getStaticProps(context) {
             });
             updatedTime = Math.floor(new Date()/1000);
         }
-        
-        /*
-        // Create the histogram buckets
-
-        let maxElo = Math.round(leaderboard[0].rating);
-        let minElo = Math.round(leaderboard[leaderboard.length - 1].rating);
-        let bucketSize = (maxElo - minElo)/NUMBER_OF_BUCKETS;
-        console.log("Constants", maxElo, minElo, bucketSize);
-
-        let cutoffs = [];
-        for(let c = NUMBER_OF_BUCKETS-1; c >= 0; c -= 1) {
-            cutoffs.push(c*bucketSize+minElo);
-        }
-        let cutoffIndex = 0;
-
-        console.log("Bucket Cutoffs", cutoffs);
-    
-        // Put each of the players in one of the buckets
-        let buckets = new Array(NUMBER_OF_BUCKETS);
-        for(let i = 0; i < NUMBER_OF_BUCKETS; i++) {
-            buckets[i] = 0;
-        }
-        for(let i = 0; i < leaderboard.length; i++) {
-            console.log(leaderboard[i].rating + " " + cutoffs[cutoffIndex]);
-            while(leaderboard[i].rating <= cutoffs[cutoffIndex]) {
-                cutoffIndex++;
-            }
-            let currentNumbnerOfPlayersInBucket = buckets[cutoffIndex];
-            buckets[cutoffIndex] = currentNumbnerOfPlayersInBucket + 1;
-        }
-
-        console.log("Filled Bucket", buckets);
-        */
 
         // Format the data so Google Charts can comsume it
         let histogramData = [['Player Name', 'ELO']];
