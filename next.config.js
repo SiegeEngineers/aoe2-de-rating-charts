@@ -6,7 +6,7 @@ module.exports = {
       "/": { page: "/" },
     }
   },
-  assetPrefix: !debug ? '/aoe2-de-elo-histogram/out' : '',
+  assetPrefix: !debug ? '/aoe2-de-elo-histogram' : '',
   webpack: (config, { dev }) => {
     // Perform customizations to webpack config
     console.log('webpack');
