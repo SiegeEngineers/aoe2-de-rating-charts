@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
-    "export": "next export",
+    "export": "next export -o docs",
     "start": "next start",
     "deploy": "git subtree push --prefix out origin gh-pages"
   },
