@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
-    "export": "next export -o docs",
+    "export": "next export",
     "start": "next start"
   },
   "repository": {
