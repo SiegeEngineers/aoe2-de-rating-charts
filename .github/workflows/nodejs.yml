@@ -1,5 +1,9 @@
 name: Build and deploy to github pages
-on: "schedule(* 23 * * *)" # Run at the end of every day (UTC) https://jasonet.co/posts/scheduled-actions/
+on: 
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    # Run at the end of every day (UTC)
+    - cron:  '* 23 * * *'
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
