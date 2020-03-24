@@ -2,8 +2,8 @@ name: Build and deploy to github pages
 on: 
   schedule:
     # * is a special character in YAML so you have to quote this string
-    # Run at the end of every day (UTC)
-    - cron:  '* 23 * * *'
+    # Run at midnight every day (UTC)
+    - cron: '0 0 * * *'
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
