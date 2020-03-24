@@ -8,7 +8,8 @@
     "build": "next build",
     "export": "next export -o docs",
     "start": "next start",
-    "pages": "next build & next export -o docs"
+    "pages": "next build & next export -o docs & touch ./docs/.nojekyll",
+    "no:": "touch ./docs/.nojekyll"
   },
   "repository": {
     "type": "git",
