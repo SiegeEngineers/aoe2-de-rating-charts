@@ -20,7 +20,7 @@ jobs:
           npm install
           npm run build
           npm run export
-          npm run no
+          npm run nojekyll
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@releases/v3 # https://github.com/marketplace/actions/deploy-to-github-pages
         with:
