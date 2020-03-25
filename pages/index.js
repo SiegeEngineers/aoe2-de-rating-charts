@@ -131,7 +131,7 @@ export default class extends Component {
       },
       title: {
         text:
-          "Age of Empires II: Definitive Edition Ratings<br>Random Map vs Team Random Map Ratings",
+          "Age of Empires II: Definitive Edition Ratings<br> 1v1 Random Map vs Team Random Map Ratings",
         font: {
           family: FONT,
           size: 24
@@ -141,7 +141,7 @@ export default class extends Component {
       },
       xaxis: {
         title: {
-          text: "Random Map Rating",
+          text: "1v1 Random Map Rating",
           font: {
             family: FONT,
             size: 18,
