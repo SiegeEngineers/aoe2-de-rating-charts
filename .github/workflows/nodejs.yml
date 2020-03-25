@@ -18,7 +18,9 @@ jobs:
       - name: Install and Build
         run: |
           npm install
-          npm run pages
+          npm run build
+          npm run export
+          npm run no
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@releases/v3 # https://github.com/marketplace/actions/deploy-to-github-pages
         with:
