@@ -9,6 +9,8 @@ export default class extends Component {
   componentDidMount() {
     let histogramArray = this.props.histogram;
     let timestamp = this.props.timestamp ? this.props.timestamp : 0;
+    let xmin = this.props.xmin;
+    let xmax = this.props.xmax;
 
     // Common chart variables
     const FONT = "Roboto, Arial, sans-serif";
@@ -40,7 +42,8 @@ export default class extends Component {
             size: 18,
             color: "#7f7f7f"
           }
-        }
+        },
+        range: [xmin, xmax]
       },
       yaxis: {
         title: {
@@ -84,7 +87,8 @@ export default class extends Component {
             size: 18,
             color: "#7f7f7f"
           }
-        }
+        },
+        range: [xmin, xmax]
       },
       yaxis: {
         title: {
@@ -143,7 +147,8 @@ export default class extends Component {
             size: 18,
             color: "#7f7f7f"
           }
-        }
+        },
+        range: [xmin, xmax]
       },
       yaxis: {
         title: {
@@ -160,7 +165,7 @@ export default class extends Component {
     Plotly.newPlot("combo_scatterplot", data, layout);
 
     let lastUpdatedDiv = document.getElementById("last_updated");
-    lastUpdatedDiv.textContent = `Last updated: ${new Date(timestamp)}`;
+    lastUpdatedDiv.textContent = `Updated at ${new Date(timestamp)}`;
   }
 
   render() {
@@ -189,9 +194,10 @@ export default class extends Component {
           <div id="github_footer">
             Source code on{" "}
             <a href="https://github.com/thbrown/aoe2-de-elo-histogram">
-              Github
+              github
             </a>
-            Data taken from
+            <br></br>
+            Data taken from{" "}
             <a href="https://aoe2.net/#api">https://aoe2.net/#api</a>
           </div>
         </body>
@@ -227,12 +233,21 @@ export async function getStaticProps(context) {
 
     // Format the data
     let aoeData = {}; // {"steamId: [name, randomMapRating, teamRandomMapRating]"}
-
+    let xmax = 0;
+    let xmin = Number.MAX_VALUE;
     for (let i = 0; i < randomMapLeaderboard.length; i++) {
       let name = randomMapLeaderboard[i].name;
       let steamId = randomMapLeaderboard[i].steam_id;
       let soloRating = randomMapLeaderboard[i].rating;
       aoeData[steamId] = [name, soloRating, null];
+
+      // Update min and max
+      if (soloRating < xmin) {
+        xmin = soloRating;
+      }
+      if (soloRating > xmax) {
+        xmax = soloRating;
+      }
     }
 
     console.log(
@@ -251,6 +266,13 @@ export async function getStaticProps(context) {
         aoeData[steamId] = [name, null, teamRating];
       } else {
         aoeData[steamId][2] = teamRating;
+      }
+      // Update min and max
+      if (teamRating < xmin) {
+        xmin = teamRating;
+      }
+      if (teamRating > xmax) {
+        xmax = teamRating;
       }
     }
 
@@ -275,7 +297,9 @@ export async function getStaticProps(context) {
     return {
       props: {
         histogram: histogramData,
-        timestamp: updatedTime
+        timestamp: updatedTime,
+        xmin: xmin,
+        xmax: xmax
       }
     };
   } catch (error) {
