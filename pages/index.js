@@ -57,7 +57,7 @@ export default class extends Component {
       }
     };
     var data = [trace];
-    Plotly.newPlot("random_map_histogram", data, layout, {scrollZoom: false});
+    let randomMapPlot = Plotly.newPlot("random_map_histogram", data, layout, {scrollZoom: false});
 
     // Team Random Map Histogram
     var teamRandomMapScores = [];
@@ -102,14 +102,14 @@ export default class extends Component {
       }
     };
     var data = [trace];
-    Plotly.newPlot("team_random_map_histogram", data, layout, {scrollZoom: false});
+    let teamRandomMapPlot = Plotly.newPlot("team_random_map_histogram", data, layout, {scrollZoom: false});
 
     // Combo Scatterplot
     var trace1 = {
       x: randomMapScores,
       y: teamRandomMapScores,
       mode: "markers",
-      type: "scatter",
+      type: "scattergl",
       textposition: "top center",
       textfont: {
         family: FONT
@@ -162,10 +162,16 @@ export default class extends Component {
       }
     };
 
-    Plotly.newPlot("combo_scatterplot", data, layout, {scrollZoom: false});
+    let scatterPlot = Plotly.newPlot("combo_scatterplot", data, layout, {scrollZoom: false});
 
     let lastUpdatedDiv = document.getElementById("last_updated");
     lastUpdatedDiv.textContent = `Updated on ${new Date(timestamp)}`;
+
+    // Remove the loading div
+    Promise.all([randomMapPlot, teamRandomMapPlot, scatterPlot]).then(function() {
+      let loadingDiv = document.getElementById("loading");
+      loadingDiv.style.display = "none";
+    })
   }
 
   render() {
@@ -180,6 +186,21 @@ export default class extends Component {
           ></script>
         </head>
         <body>
+          <div id="loading" style={{    
+              backgroundColor: "black",
+              display: "flex",
+              zIndex: 1,
+              padding: "10px",
+              borderRadius: "25px"}}>
+            <img src="/puff.svg" alt="Loading..." style={{    
+              backgroundColor: "black",
+              width: "100px",
+              height: "100px",
+              padding: "10px"}}></img>
+            <div style={{padding: "33px", color:"white", fontSize:"30pt"}}>
+            Loading...
+            </div>
+          </div>
           <div
             id="random_map_histogram"
             style={{ width: "900px", height: "500px" }}
@@ -257,10 +278,7 @@ export async function getStaticProps(context) {
       randomMapLeaderboard.length
     );
 
-    // Change 'numberOfPlayersToUse' to something like '1000' for development.
-    // You won't get all the data, but it will build MUCH faster after the API calls are cached.
-    let numberOfPlayersToUse = teamRandomMapLeaderbaord.length;
-    for (let i = 0; i < numberOfPlayersToUse; i++) {
+    for (let i = 0; i < teamRandomMapLeaderbaord.length; i++) {
       let name = teamRandomMapLeaderbaord[i].name;
       let steamId = teamRandomMapLeaderbaord[i].steam_id;
       let teamRating = teamRandomMapLeaderbaord[i].rating;
@@ -286,6 +304,12 @@ export async function getStaticProps(context) {
     let histogramData = [];
     for (const property in aoeData) {
       histogramData.push(aoeData[property]);
+
+      // Uncomment these lines for development
+      // You won't get all the data, but it will build MUCH faster after the API calls are cached.
+      //if(histogramData.length > 1000) {
+      //  break;
+      //}
     }
 
     console.log("Total number of ranked players", histogramData.length);
