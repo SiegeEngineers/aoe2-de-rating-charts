@@ -57,7 +57,7 @@ export default class extends Component {
       }
     };
     var data = [trace];
-    Plotly.newPlot("random_map_histogram", data, layout);
+    Plotly.newPlot("random_map_histogram", data, layout, {scrollZoom: false});
 
     // Team Random Map Histogram
     var teamRandomMapScores = [];
@@ -102,7 +102,7 @@ export default class extends Component {
       }
     };
     var data = [trace];
-    Plotly.newPlot("team_random_map_histogram", data, layout);
+    Plotly.newPlot("team_random_map_histogram", data, layout, {scrollZoom: false});
 
     // Combo Scatterplot
     var trace1 = {
@@ -162,16 +162,18 @@ export default class extends Component {
       }
     };
 
-    Plotly.newPlot("combo_scatterplot", data, layout);
+    Plotly.newPlot("combo_scatterplot", data, layout, {scrollZoom: false});
 
     let lastUpdatedDiv = document.getElementById("last_updated");
-    lastUpdatedDiv.textContent = `Updated at ${new Date(timestamp)}`;
+    lastUpdatedDiv.textContent = `Updated on ${new Date(timestamp)}`;
   }
 
   render() {
     return (
       <html>
         <head>
+          <title>Age of Empires II: Definitive Edition Rating Charts</title>
+          <meta name="description" content="Histograms and a scatterplot for 'Age of Empires II: Definitive Edition' 1v1 Random Map and Team Random Map."/>
           <script
             type="text/javascript"
             src="https://cdn.plot.ly/plotly-latest.min.js"
@@ -387,7 +389,7 @@ async function getLeaderboardData(leaderboardId) {
       }
       console.log("API responses were cached");
     });
-    updatedTime = Math.floor(new Date() / 1000);
+    updatedTime = Math.floor(new Date());
   }
   return {
     updatedTime: updatedTime,
