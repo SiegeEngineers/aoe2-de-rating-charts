@@ -21,11 +21,13 @@ jobs:
           npm run build
           npm run export
           npm run nojekyll
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@releases/v3 # https://github.com/marketplace/actions/deploy-to-github-pages
+      - name: Commit files
+        run: |
+          git config --local user.email "thomasaustenbrown@gmail.com"
+          git config --local user.name "thbrown"
+          git add -A
+          git commit -m "Update page"
+      - name: Push changes
+        uses: ad-m/github-push-action@master # https://github.com/ad-m/github-push-action
         with:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: master # The branch the action should deploy to.
-          TARGET_FOLDER: docs # The folder the action should deploy to.
-          FOLDER: docs # The folder the action should deploy.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
