@@ -36,7 +36,7 @@ export default class extends Component {
       },
       xaxis: {
         title: {
-          text: "Rating",
+          text: "1v1 Random Map Rating",
           font: {
             family: FONT,
             size: 18,
@@ -57,7 +57,9 @@ export default class extends Component {
       }
     };
     var data = [trace];
-    let randomMapPlot = Plotly.newPlot("random_map_histogram", data, layout, {scrollZoom: false});
+    let randomMapPlot = Plotly.newPlot("random_map_histogram", data, layout, {
+      scrollZoom: false
+    });
 
     // Team Random Map Histogram
     var teamRandomMapScores = [];
@@ -81,7 +83,7 @@ export default class extends Component {
       },
       xaxis: {
         title: {
-          text: "Rating",
+          text: "Team Random Map Rating",
           font: {
             family: FONT,
             size: 18,
@@ -102,7 +104,12 @@ export default class extends Component {
       }
     };
     var data = [trace];
-    let teamRandomMapPlot = Plotly.newPlot("team_random_map_histogram", data, layout, {scrollZoom: false});
+    let teamRandomMapPlot = Plotly.newPlot(
+      "team_random_map_histogram",
+      data,
+      layout,
+      { scrollZoom: false }
+    );
 
     // Combo Scatterplot
     var trace1 = {
@@ -131,7 +138,7 @@ export default class extends Component {
       },
       title: {
         text:
-          "Age of Empires II: Definitive Edition Ratings<br> 1v1 Random Map vs Team Random Map Ratings",
+          "Age of Empires II: Definitive Edition Ratings<br>1v1 Random Map vs Team Random Map Ratings",
         font: {
           family: FONT,
           size: 24
@@ -162,16 +169,20 @@ export default class extends Component {
       }
     };
 
-    let scatterPlot = Plotly.newPlot("combo_scatterplot", data, layout, {scrollZoom: false});
+    let scatterPlot = Plotly.newPlot("combo_scatterplot", data, layout, {
+      scrollZoom: false
+    });
 
     let lastUpdatedDiv = document.getElementById("last_updated");
     lastUpdatedDiv.textContent = `Updated on ${new Date(timestamp)}`;
 
     // Remove the loading div
-    Promise.all([randomMapPlot, teamRandomMapPlot, scatterPlot]).then(function() {
-      let loadingDiv = document.getElementById("loading");
-      loadingDiv.style.display = "none";
-    })
+    Promise.all([randomMapPlot, teamRandomMapPlot, scatterPlot]).then(
+      function() {
+        let loadingDiv = document.getElementById("loading");
+        loadingDiv.style.display = "none";
+      }
+    );
   }
 
   render() {
@@ -179,26 +190,38 @@ export default class extends Component {
       <html>
         <head>
           <title>Age of Empires II: Definitive Edition Rating Charts</title>
-          <meta name="description" content="Histograms and a scatterplot for 'Age of Empires II: Definitive Edition' 1v1 Random Map and Team Random Map."/>
+          <meta
+            name="description"
+            content="Histograms and a scatterplot for 'Age of Empires II: Definitive Edition' 1v1 Random Map and Team Random Map."
+          />
           <script
             type="text/javascript"
             src="https://cdn.plot.ly/plotly-latest.min.js"
           ></script>
         </head>
         <body>
-          <div id="loading" style={{    
+          <div
+            id="loading"
+            style={{
               backgroundColor: "black",
               display: "flex",
               zIndex: 1,
               padding: "10px",
-              borderRadius: "25px"}}>
-            <img src="/puff.svg" alt="Loading..." style={{    
-              backgroundColor: "black",
-              width: "100px",
-              height: "100px",
-              padding: "10px"}}></img>
-            <div style={{padding: "33px", color:"white", fontSize:"30pt"}}>
-            Loading...
+              borderRadius: "25px"
+            }}
+          >
+            <img
+              src="/puff.svg"
+              alt="Loading..."
+              style={{
+                backgroundColor: "black",
+                width: "100px",
+                height: "100px",
+                padding: "10px"
+              }}
+            ></img>
+            <div style={{ padding: "33px", color: "white", fontSize: "30pt" }}>
+              Loading...
             </div>
           </div>
           <div
@@ -220,8 +243,7 @@ export default class extends Component {
               github
             </a>
             <br></br>
-            Data taken from{" "}
-            <a href="https://aoe2.net/#api">https://aoe2.net/#api</a>
+            Data from <a href="https://aoe2.net/#api">https://aoe2.net/#api</a>
           </div>
         </body>
       </html>
