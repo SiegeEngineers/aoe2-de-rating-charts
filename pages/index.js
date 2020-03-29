@@ -1,10 +1,34 @@
 import React, { Component } from "react";
+//import AsyncSelect from "react-select/async";
+
+import Select from "../components/select.js";
 
 const got = require("got");
 const fs = require("fs");
 
+// Set this to true for development. You won't get all the data, but it will build MUCH faster after the API calls are cached.
+const DEVELOP = false;
+const DEFAULT_COLOR = "#1f77b4"; // blue
+const TEAM_ONE_COLOR = "#ff9f04"; // orange
+const TEAM_TWO_COLOR = "#ff2104"; // red
+
+/*
+TODO:
+1) Once something is selected in one select, remove it from the other
+2) All orange if empty?
+3) What if multiple players on different teams map the the same bucket?
+4) Variable names...
+5) Text area
+6) Green points in scatterplot
+7) "Trace 2" on hover
+8) Format lables
+*/
+
 export default class extends Component {
-  state = {};
+  state = {
+    teamOne: [],
+    teamTwo: []
+  };
 
   componentDidMount() {
     let histogramArray = this.props.histogram;
@@ -17,9 +41,10 @@ export default class extends Component {
 
     // Random Map Histogram
     var randomMapScores = [];
-    for (var i = 0; i < histogramArray.length; i++) {
+    for (let i = 0; i < histogramArray.length; i++) {
       randomMapScores[i] = histogramArray[i][1];
     }
+
     var trace = {
       x: randomMapScores,
       type: "histogram"
@@ -127,15 +152,7 @@ export default class extends Component {
     var data = [trace1];
 
     var layout = {
-      legend: {
-        y: 0.5,
-        yref: "paper",
-        font: {
-          family: FONT,
-          size: 20,
-          color: "grey"
-        }
-      },
+      showlegend: false,
       title: {
         text:
           "Age of Empires II: Definitive Edition Ratings<br>1v1 Random Map vs Team Random Map Ratings",
@@ -170,7 +187,8 @@ export default class extends Component {
     };
 
     let scatterPlot = Plotly.newPlot("combo_scatterplot", data, layout, {
-      scrollZoom: false
+      scrollZoom: false,
+      responsive: true
     });
 
     let lastUpdatedDiv = document.getElementById("last_updated");
@@ -178,11 +196,70 @@ export default class extends Component {
 
     // Remove the loading div
     Promise.all([randomMapPlot, teamRandomMapPlot, scatterPlot]).then(
-      function() {
+      function(values) {
         let loadingDiv = document.getElementById("loading");
         loadingDiv.style.display = "none";
-      }
+
+        this.randomMapDiv = values[0];
+        this.teamRandomMapDiv = values[1];
+        this.scatterplotDiv = values[2];
+      }.bind(this)
     );
+  }
+
+  componentDidUpdate() {
+    let teamOneSelection = this.state.teamOne ? this.state.teamOne : [];
+    let teamTwoSelection = this.state.teamTwo ? this.state.teamTwo : [];
+
+    // Update 1v1 random map
+    let soloRandomMapColorInfo = [];
+    for (let i = 0; i < teamOneSelection.length; i++) {
+      soloRandomMapColorInfo.push({
+        color: TEAM_ONE_COLOR,
+        value: teamOneSelection[i][1]
+      });
+    }
+    for (let i = 0; i < teamTwoSelection.length; i++) {
+      soloRandomMapColorInfo.push({
+        color: TEAM_TWO_COLOR,
+        value: teamTwoSelection[i][1]
+      });
+    }
+    highlightHistogramMarker(this.randomMapDiv, soloRandomMapColorInfo);
+
+    // Update team random map
+    let teamRandomMapColorInfo = [];
+    for (let i = 0; i < teamOneSelection.length; i++) {
+      teamRandomMapColorInfo.push({
+        color: TEAM_ONE_COLOR,
+        value: teamOneSelection[i][2]
+      });
+    }
+    for (let i = 0; i < teamTwoSelection.length; i++) {
+      teamRandomMapColorInfo.push({
+        color: TEAM_TWO_COLOR,
+        value: teamTwoSelection[i][2]
+      });
+    }
+    highlightHistogramMarker(this.teamRandomMapDiv, teamRandomMapColorInfo);
+
+    // Update scatterplot
+    let scatterPlotColorInfo = [];
+    for (let i = 0; i < teamOneSelection.length; i++) {
+      scatterPlotColorInfo.push({
+        color: TEAM_ONE_COLOR,
+        valueX: teamOneSelection[i][1],
+        valueY: teamOneSelection[i][2]
+      });
+    }
+    for (let i = 0; i < teamTwoSelection.length; i++) {
+      scatterPlotColorInfo.push({
+        color: TEAM_TWO_COLOR,
+        valueX: teamTwoSelection[i][1],
+        valueY: teamTwoSelection[i][2]
+      });
+    }
+    highlightScatterplotMarker(this.scatterplotDiv, scatterPlotColorInfo);
   }
 
   render() {
@@ -224,6 +301,29 @@ export default class extends Component {
               Loading...
             </div>
           </div>
+          <div id="selectors">
+            <div>
+              <label htmlFor="teamOne">Team 1:</label>
+              <Select
+                id="teamOne"
+                dataSet={this.props.histogram}
+                onSelection={function(selection) {
+                  this.setState({ teamOne: selection });
+                }.bind(this)}
+              ></Select>
+            </div>
+            <div>
+              <label htmlFor="teamTwo">Team 2:</label>
+              <Select
+                id="teamTwo"
+                dataSet={this.props.histogram}
+                onSelection={function(selection) {
+                  this.setState({ teamTwo: selection });
+                }.bind(this)}
+              ></Select>
+            </div>
+          </div>
+          <div id="table"></div>
           <div
             id="random_map_histogram"
             style={{ width: "900px", height: "500px" }}
@@ -253,7 +353,7 @@ export default class extends Component {
 
 const CACHE_DIRECTORY = "cache/";
 const CACHE_FILE_NAME = "ApiCache.json";
-const CACHE_EXPIRATION_IN_HOURS = 23; // Change this to 0 to bypass cache
+const CACHE_EXPIRATION_IN_HOURS = 9999999; // Change this to 0 to bypass cache
 const API_CALL_CHUNK_SIZE = 1000;
 const API_CALL_DELAY_IN_MS = 2000;
 
@@ -327,11 +427,10 @@ export async function getStaticProps(context) {
     for (const property in aoeData) {
       histogramData.push(aoeData[property]);
 
-      // Uncomment these lines for development
-      // You won't get all the data, but it will build MUCH faster after the API calls are cached.
-      //if(histogramData.length > 1000) {
-      //  break;
-      //}
+      // Only use the first 1000 entries in development for speed
+      if (DEVELOP && histogramData.length >= 1000) {
+        break;
+      }
     }
 
     console.log("Total number of ranked players", histogramData.length);
@@ -341,7 +440,7 @@ export async function getStaticProps(context) {
       "Doing nextjs stuff, this next step may take a few minutes if using all the players. Please be patient..."
     );
 
-    // the return calue will be passed to the page component as props
+    // the return value will be passed to the page component as props
     return {
       props: {
         histogram: histogramData,
@@ -441,4 +540,106 @@ async function getLeaderboardData(leaderboardId) {
     updatedTime: updatedTime,
     leaderboard: leaderboard
   };
+}
+
+// Accepts values in the form {color: "rgb(31, 119, 180)", value: 1066}
+function highlightHistogramMarker(chartElement, values) {
+  let numberOfBuckets = chartElement.calcdata[0].length;
+
+  // Filter out any values that are undefined
+  values = values.filter(value => value.value);
+
+  // Get the unique colors, assign each color a number begining with 0 and counting by ones
+  let counter = 1;
+  let colors = {};
+  for (let i = 0; i < values.length; i++) {
+    let colorString = values[i].color;
+    if (colors[colorString] === undefined) {
+      colors[colorString] = counter;
+      counter++;
+    }
+  }
+
+  // Make sure the values are ordered
+  values.sort(function(a, b) {
+    return a.value - b.value;
+  });
+
+  // Find the buckets our values fit in
+  let valueIndex = 0;
+  let bucketColors = new Array(numberOfBuckets).fill(0); // All buckets start with the default color
+  for (let i = 0; i < numberOfBuckets; i++) {
+    // Check if any of our values are in this bucket
+    while (
+      valueIndex < values.length &&
+      values[valueIndex].value >= chartElement.calcdata[0][i].ph0 &&
+      values[valueIndex].value <= chartElement.calcdata[0][i].ph1
+    ) {
+      bucketColors[i] = colors[values[valueIndex].color];
+      valueIndex++;
+    }
+
+    // Check if we've bucketed every value
+    if (valueIndex >= values.length) {
+      break;
+    }
+  }
+
+  // Format colorscale data
+  const maxValueInBucketColors = Object.keys(colors).length;
+  let colorscale = [[0, DEFAULT_COLOR]];
+  for (const prop in colors) {
+    let localArray = [colors[prop] / maxValueInBucketColors, prop];
+    colorscale.push(localArray);
+  }
+
+  // Update the color of spicific markers on the 0th trace
+  var update = {
+    "marker.color": [bucketColors],
+    "marker.colorscale": [colorscale],
+    "marker.cmax": maxValueInBucketColors,
+    "marker.cmin": 0
+  };
+  Plotly.restyle(chartElement, update, 0);
+}
+
+// Accepts values in the form {color: "rgb(31, 119, 180)", valueX: 1066, valueY: 1442}
+function highlightScatterplotMarker(chartElement, values) {
+  // Determine the number of unique colors - one trace per color
+  let counter = 0;
+  let colors = {};
+  for (let i = 0; i < values.length; i++) {
+    if (colors[values[i].color] === undefined) {
+      colors[values[i].color] = {
+        counter: counter,
+        x: [values[i].valueX],
+        y: [values[i].valueY]
+      };
+      counter++;
+    } else {
+      colors[values[i].color].x.push(values[i].valueX);
+      colors[values[i].color].y.push(values[i].valueY);
+    }
+  }
+
+  // Remove any existing highlight traces if they exists
+  while (chartElement.data.length >= 2) {
+    Plotly.deleteTraces(chartElement, 1);
+  }
+
+  // Add a new traces with our highlighted points
+  let newTraces = [];
+  for (const prop in colors) {
+    var trace = {
+      x: colors[prop].x,
+      y: colors[prop].y,
+      mode: "markers",
+      type: "scattergl",
+      color: prop,
+      textposition: "top center",
+      marker: { size: 8 }
+    };
+    newTraces.push(trace);
+  }
+  Plotly.addTraces(chartElement, newTraces);
 }
