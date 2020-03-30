@@ -7,7 +7,6 @@ class Select extends React.Component {
   handleInputChange = selection => {
     // We only want to pass up the values, not the lables
     selection = selection ? selection : [];
-    console.log("Selection value changed", selection);
     let selectionValuesOnly = [];
     for (let i = 0; i < selection.length; i++) {
       selectionValuesOnly.push(selection[i].value);

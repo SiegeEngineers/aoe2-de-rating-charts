@@ -20,15 +20,14 @@ const FONT = "Roboto, Arial, sans-serif";
 /*
 TODO:
 1) Once something is selected in one select, remove it from the other
-3) What if multiple players on different teams map the the same bucket?
+3) What if multiple players on different teams map to the same bucket?
 4) Variable names...
 5) Text area with rating values, percentiles
-6) Green points in scatterplot
 7) "Trace 2" on hover
-8) Format labels
-9) Side margin on charts on mobile
-10) Center chart title text
 11) Max width of charts
+12) URL change when players are selected
+13) Select box turns blue whenh selected instead of team colot
+14) Color chips in select box
 */
 
 export default class extends Component {
@@ -63,8 +62,14 @@ export default class extends Component {
           family: FONT,
           size: TITLE_FONT_SIZE
         },
-        xref: "paper",
-        x: 0.05
+        xanchor: "center",
+        yanchor: "bottom"
+      },
+      margin: {
+        l: 50,
+        r: 15,
+        t: 50,
+        b: 30
       },
       xaxis: {
         title: {
@@ -114,8 +119,14 @@ export default class extends Component {
           family: FONT,
           size: TITLE_FONT_SIZE
         },
-        xref: "paper",
-        x: 0.05
+        xanchor: "center",
+        yanchor: "bottom"
+      },
+      margin: {
+        l: 50,
+        r: 15,
+        t: 50,
+        b: 30
       },
       xaxis: {
         title: {
@@ -165,13 +176,19 @@ export default class extends Component {
     var layout = {
       showlegend: false,
       title: {
-        text: "1v1 Random Map x Team Random Map",
+        text: "1v1 Random Map vs<br>Team Random Map",
         font: {
           family: FONT,
           size: TITLE_FONT_SIZE
         },
-        xref: "paper",
-        x: 0.05
+        xanchor: "center",
+        yanchor: "bottom"
+      },
+      margin: {
+        l: 50,
+        r: 15,
+        t: 50,
+        b: 30
       },
       xaxis: {
         title: {
@@ -202,7 +219,7 @@ export default class extends Component {
     });
 
     let lastUpdatedDiv = document.getElementById("last_updated");
-    lastUpdatedDiv.textContent = `Updated on ${new Date(timestamp)}`;
+    lastUpdatedDiv.innerHTML = `Last updated on <i>${new Date(timestamp)}</i>`;
 
     // Remove the loading div
     Promise.all([randomMapPlot, teamRandomMapPlot, scatterPlot]).then(
@@ -315,37 +332,54 @@ export default class extends Component {
               </div>
             </div>
             <div>
-              <h1>Age of Empires II: Definitive Edition Rating Charts</h1>
+              <h2>Age of Empires II: Definitive Edition Rating Charts</h2>
             </div>
             <div id="selectors">
               <div>
                 <label htmlFor="teamOne">Team 1:</label>
-                <Select
-                  id="teamOne"
-                  dataSet={this.props.histogram}
-                  onSelection={function(selection) {
-                    this.setState({ teamOne: selection });
-                  }.bind(this)}
-                ></Select>
+                <div
+                  style={{
+                    border: TEAM_ONE_COLOR,
+                    borderStyle: "solid",
+                    borderRadius: "7px"
+                  }}
+                >
+                  <Select
+                    id="teamOne"
+                    dataSet={this.props.histogram}
+                    onSelection={function(selection) {
+                      this.setState({ teamOne: selection });
+                    }.bind(this)}
+                  ></Select>
+                </div>
               </div>
               <div style={{ marginTop: "16px" }}>
                 <label htmlFor="teamTwo">Team 2:</label>
-                <Select
-                  id="teamTwo"
-                  dataSet={this.props.histogram}
-                  onSelection={function(selection) {
-                    this.setState({ teamTwo: selection });
-                  }.bind(this)}
-                ></Select>
+                <div
+                  style={{
+                    border: TEAM_TWO_COLOR,
+                    borderStyle: "solid",
+                    borderRadius: "7px"
+                  }}
+                >
+                  <Select
+                    id="teamTwo"
+                    dataSet={this.props.histogram}
+                    onSelection={function(selection) {
+                      this.setState({ teamTwo: selection });
+                    }.bind(this)}
+                  ></Select>
+                </div>
               </div>
             </div>
             <div id="table"></div>
             <div id="random_map_histogram"></div>
             <div id="team_random_map_histogram"></div>
             <div id="combo_scatterplot"></div>
-            <div id="last_updated"></div>
-            <div id="github_footer">
-              Source code on{" "}
+
+            <div id="footer" style={{ fontSize: "12px" }}>
+              <div id="last_updated"></div>
+              View source code on{" "}
               <a href="https://github.com/thbrown/aoe2-de-elo-histogram">
                 github
               </a>
@@ -652,9 +686,8 @@ function highlightScatterplotMarker(chartElement, values) {
       y: colors[prop].y,
       mode: "markers",
       type: "scattergl",
-      color: prop,
       textposition: "top center",
-      marker: { size: 8 }
+      marker: { size: 8, color: prop }
     };
     newTraces.push(trace);
   }
