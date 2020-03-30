@@ -8,20 +8,27 @@ const fs = require("fs");
 
 // Set this to true for development. You won't get all the data, but it will build MUCH faster after the API calls are cached.
 const DEVELOP = false;
-const DEFAULT_COLOR = "#1f77b4"; // blue
-const TEAM_ONE_COLOR = "#ff9f04"; // orange
-const TEAM_TWO_COLOR = "#ff2104"; // red
+const DEFAULT_COLOR = "#0eac22"; // green
+const TEAM_ONE_COLOR = "#6311a5"; // purple
+const TEAM_TWO_COLOR = "#fe9918"; // orange
+// Common chart variables
+const AXIS_FONT_SIZE = 14;
+const AXIS_FONT_COLOR = "#7f7f7f";
+const TITLE_FONT_SIZE = 18;
+const FONT = "Roboto, Arial, sans-serif";
 
 /*
 TODO:
 1) Once something is selected in one select, remove it from the other
-2) All orange if empty?
 3) What if multiple players on different teams map the the same bucket?
 4) Variable names...
-5) Text area
+5) Text area with rating values, percentiles
 6) Green points in scatterplot
 7) "Trace 2" on hover
-8) Format lables
+8) Format labels
+9) Side margin on charts on mobile
+10) Center chart title text
+11) Max width of charts
 */
 
 export default class extends Component {
@@ -36,9 +43,6 @@ export default class extends Component {
     let xmin = this.props.xmin;
     let xmax = this.props.xmax;
 
-    // Common chart variables
-    const FONT = "Roboto, Arial, sans-serif";
-
     // Random Map Histogram
     var randomMapScores = [];
     for (let i = 0; i < histogramArray.length; i++) {
@@ -47,25 +51,28 @@ export default class extends Component {
 
     var trace = {
       x: randomMapScores,
-      type: "histogram"
+      type: "histogram",
+      marker: {
+        color: DEFAULT_COLOR
+      }
     };
     var layout = {
       title: {
-        text: "Age of Empires II: Definitive Edition Ratings<br>1v1 Random Map",
+        text: "1v1 Random Map",
         font: {
           family: FONT,
-          size: 24
+          size: TITLE_FONT_SIZE
         },
         xref: "paper",
         x: 0.05
       },
       xaxis: {
         title: {
-          text: "1v1 Random Map Rating",
+          text: "Rating",
           font: {
             family: FONT,
-            size: 18,
-            color: "#7f7f7f"
+            size: AXIS_FONT_SIZE,
+            color: AXIS_FONT_COLOR
           }
         },
         range: [xmin, xmax]
@@ -75,15 +82,17 @@ export default class extends Component {
           text: "Number of Players",
           font: {
             family: FONT,
-            size: 18,
-            color: "#7f7f7f"
+            size: AXIS_FONT_SIZE,
+            color: AXIS_FONT_COLOR
           }
         }
-      }
+      },
+      marker: { color: DEFAULT_COLOR }
     };
     var data = [trace];
     let randomMapPlot = Plotly.newPlot("random_map_histogram", data, layout, {
-      scrollZoom: false
+      scrollZoom: false,
+      responsive: true
     });
 
     // Team Random Map Histogram
@@ -93,26 +102,28 @@ export default class extends Component {
     }
     var trace = {
       x: teamRandomMapScores,
-      type: "histogram"
+      type: "histogram",
+      marker: {
+        color: DEFAULT_COLOR
+      }
     };
     var layout = {
       title: {
-        text:
-          "Age of Empires II: Definitive Edition Ratings<br>Team Random Map",
+        text: "Team Random Map",
         font: {
           family: FONT,
-          size: 24
+          size: TITLE_FONT_SIZE
         },
         xref: "paper",
         x: 0.05
       },
       xaxis: {
         title: {
-          text: "Team Random Map Rating",
+          text: "Rating",
           font: {
             family: FONT,
-            size: 18,
-            color: "#7f7f7f"
+            size: AXIS_FONT_SIZE,
+            color: AXIS_FONT_COLOR
           }
         },
         range: [xmin, xmax]
@@ -122,8 +133,8 @@ export default class extends Component {
           text: "Number of Players",
           font: {
             family: FONT,
-            size: 18,
-            color: "#7f7f7f"
+            size: AXIS_FONT_SIZE,
+            color: AXIS_FONT_COLOR
           }
         }
       }
@@ -133,7 +144,7 @@ export default class extends Component {
       "team_random_map_histogram",
       data,
       layout,
-      { scrollZoom: false }
+      { scrollZoom: false, responsive: true }
     );
 
     // Combo Scatterplot
@@ -146,7 +157,7 @@ export default class extends Component {
       textfont: {
         family: FONT
       },
-      marker: { size: 2 }
+      marker: { size: 2, color: DEFAULT_COLOR }
     };
 
     var data = [trace1];
@@ -154,11 +165,10 @@ export default class extends Component {
     var layout = {
       showlegend: false,
       title: {
-        text:
-          "Age of Empires II: Definitive Edition Ratings<br>1v1 Random Map vs Team Random Map Ratings",
+        text: "1v1 Random Map x Team Random Map",
         font: {
           family: FONT,
-          size: 24
+          size: TITLE_FONT_SIZE
         },
         xref: "paper",
         x: 0.05
@@ -168,8 +178,8 @@ export default class extends Component {
           text: "1v1 Random Map Rating",
           font: {
             family: FONT,
-            size: 18,
-            color: "#7f7f7f"
+            size: AXIS_FONT_SIZE,
+            color: AXIS_FONT_COLOR
           }
         },
         range: [xmin, xmax]
@@ -179,8 +189,8 @@ export default class extends Component {
           text: "Team Random Map Rating",
           font: {
             family: FONT,
-            size: 18,
-            color: "#7f7f7f"
+            size: AXIS_FONT_SIZE,
+            color: AXIS_FONT_COLOR
           }
         }
       }
@@ -276,74 +286,73 @@ export default class extends Component {
             src="https://cdn.plot.ly/plotly-latest.min.js"
           ></script>
         </head>
-        <body>
-          <div
-            id="loading"
-            style={{
-              backgroundColor: "black",
-              display: "flex",
-              zIndex: 1,
-              padding: "10px",
-              borderRadius: "25px"
-            }}
-          >
-            <img
-              src="/puff.svg"
-              alt="Loading..."
+        <body style={{ fontFamily: FONT }}>
+          <div id="center">
+            <div
+              id="loading"
               style={{
                 backgroundColor: "black",
-                width: "100px",
-                height: "100px",
-                padding: "10px"
+                display: "flex",
+                zIndex: 1,
+                padding: "10px",
+                borderRadius: "25px"
               }}
-            ></img>
-            <div style={{ padding: "33px", color: "white", fontSize: "30pt" }}>
-              Loading...
+            >
+              <img
+                src="/puff.svg"
+                alt="Loading..."
+                style={{
+                  backgroundColor: "black",
+                  width: "100px",
+                  height: "100px",
+                  padding: "10px"
+                }}
+              ></img>
+              <div
+                style={{ padding: "33px", color: "white", fontSize: "30pt" }} // FIX ME to PX
+              >
+                Loading...
+              </div>
             </div>
-          </div>
-          <div id="selectors">
             <div>
-              <label htmlFor="teamOne">Team 1:</label>
-              <Select
-                id="teamOne"
-                dataSet={this.props.histogram}
-                onSelection={function(selection) {
-                  this.setState({ teamOne: selection });
-                }.bind(this)}
-              ></Select>
+              <h1>Age of Empires II: Definitive Edition Rating Charts</h1>
             </div>
-            <div>
-              <label htmlFor="teamTwo">Team 2:</label>
-              <Select
-                id="teamTwo"
-                dataSet={this.props.histogram}
-                onSelection={function(selection) {
-                  this.setState({ teamTwo: selection });
-                }.bind(this)}
-              ></Select>
+            <div id="selectors">
+              <div>
+                <label htmlFor="teamOne">Team 1:</label>
+                <Select
+                  id="teamOne"
+                  dataSet={this.props.histogram}
+                  onSelection={function(selection) {
+                    this.setState({ teamOne: selection });
+                  }.bind(this)}
+                ></Select>
+              </div>
+              <div style={{ marginTop: "16px" }}>
+                <label htmlFor="teamTwo">Team 2:</label>
+                <Select
+                  id="teamTwo"
+                  dataSet={this.props.histogram}
+                  onSelection={function(selection) {
+                    this.setState({ teamTwo: selection });
+                  }.bind(this)}
+                ></Select>
+              </div>
             </div>
-          </div>
-          <div id="table"></div>
-          <div
-            id="random_map_histogram"
-            style={{ width: "900px", height: "500px" }}
-          ></div>
-          <div
-            id="team_random_map_histogram"
-            style={{ width: "900px", height: "500px" }}
-          ></div>
-          <div
-            id="combo_scatterplot"
-            style={{ width: "900px", height: "500px" }}
-          ></div>
-          <div id="last_updated"></div>
-          <div id="github_footer">
-            Source code on{" "}
-            <a href="https://github.com/thbrown/aoe2-de-elo-histogram">
-              github
-            </a>
-            <br></br>
-            Data from <a href="https://aoe2.net/#api">https://aoe2.net/#api</a>
+            <div id="table"></div>
+            <div id="random_map_histogram"></div>
+            <div id="team_random_map_histogram"></div>
+            <div id="combo_scatterplot"></div>
+            <div id="last_updated"></div>
+            <div id="github_footer">
+              Source code on{" "}
+              <a href="https://github.com/thbrown/aoe2-de-elo-histogram">
+                github
+              </a>
+              <br></br>
+              Data from{" "}
+              <a href="https://aoe2.net/#api">https://aoe2.net/#api</a>
+            </div>
           </div>
         </body>
       </html>
@@ -593,13 +602,21 @@ function highlightHistogramMarker(chartElement, values) {
     colorscale.push(localArray);
   }
 
-  // Update the color of spicific markers on the 0th trace
-  var update = {
-    "marker.color": [bucketColors],
-    "marker.colorscale": [colorscale],
-    "marker.cmax": maxValueInBucketColors,
-    "marker.cmin": 0
-  };
+  let update = {};
+  if (colorscale.length == 1) {
+    update = {
+      "marker.color": colorscale[0][1]
+    };
+  } else {
+    // Update the color of specific markers on the 0th trace
+    update = {
+      "marker.color": [bucketColors],
+      "marker.colorscale": [colorscale],
+      "marker.cmax": maxValueInBucketColors,
+      "marker.cmin": 0
+    };
+  }
+
   Plotly.restyle(chartElement, update, 0);
 }
 
