@@ -1,16 +1,19 @@
 import React, { Component } from "react";
-//import AsyncSelect from "react-select/async";
-
 import Select from "../components/select.js";
+import TeamTable from "../components/team-table.js";
+
+import Data from "../helpers/data.js";
+
+import styles from "./index.module.css";
 
 const got = require("got");
 const fs = require("fs");
 
 // Set this to true for development. You won't get all the data, but it will build MUCH faster after the API calls are cached.
-const DEVELOP = false;
 const DEFAULT_COLOR = "#0eac22"; // green
 const TEAM_ONE_COLOR = "#6311a5"; // purple
 const TEAM_TWO_COLOR = "#fe9918"; // orange
+
 // Common chart variables
 const AXIS_FONT_SIZE = 14;
 const AXIS_FONT_COLOR = "#7f7f7f";
@@ -19,37 +22,33 @@ const FONT = "Roboto, Arial, sans-serif";
 
 /*
 TODO:
-1) Once something is selected in one select, remove it from the other
 3) What if multiple players on different teams map to the same bucket?
 4) Variable names...
-5) Text area with rating values, percentiles
 7) "Trace 2" on hover
-11) Max width of charts
 12) URL change when players are selected
-13) Select box turns blue whenh selected instead of team colot
+13) Select box turns blue whenh selected instead of team color
 14) Color chips in select box
+15) There are a different number of buckets in each histogram
 */
 
 export default class extends Component {
   state = {
+    data: null,
     teamOne: [],
     teamTwo: []
   };
 
   componentDidMount() {
-    let histogramArray = this.props.histogram;
+    let dataSet = new Data(this.props.data);
+    let histogramArray = []; //JSON.parse(this.props.histogram);
     let timestamp = this.props.timestamp ? this.props.timestamp : 0;
     let xmin = this.props.xmin;
     let xmax = this.props.xmax;
 
     // Random Map Histogram
-    var randomMapScores = [];
-    for (let i = 0; i < histogramArray.length; i++) {
-      randomMapScores[i] = histogramArray[i][1];
-    }
 
     var trace = {
-      x: randomMapScores,
+      x: dataSet.getAllSoloRatings(),
       type: "histogram",
       marker: {
         color: DEFAULT_COLOR
@@ -106,7 +105,7 @@ export default class extends Component {
       teamRandomMapScores[i] = histogramArray[i][2];
     }
     var trace = {
-      x: teamRandomMapScores,
+      x: dataSet.getAllTeamRatings(),
       type: "histogram",
       marker: {
         color: DEFAULT_COLOR
@@ -160,8 +159,8 @@ export default class extends Component {
 
     // Combo Scatterplot
     var trace1 = {
-      x: randomMapScores,
-      y: teamRandomMapScores,
+      x: dataSet.getAllSoloRatings(),
+      y: dataSet.getAllTeamRatings(),
       mode: "markers",
       type: "scattergl",
       textposition: "top center",
@@ -230,6 +229,8 @@ export default class extends Component {
         this.randomMapDiv = values[0];
         this.teamRandomMapDiv = values[1];
         this.scatterplotDiv = values[2];
+
+        this.setState({ data: dataSet });
       }.bind(this)
     );
   }
@@ -243,13 +244,13 @@ export default class extends Component {
     for (let i = 0; i < teamOneSelection.length; i++) {
       soloRandomMapColorInfo.push({
         color: TEAM_ONE_COLOR,
-        value: teamOneSelection[i][1]
+        value: this.state.data.getSoloRating(teamOneSelection[i])
       });
     }
     for (let i = 0; i < teamTwoSelection.length; i++) {
       soloRandomMapColorInfo.push({
         color: TEAM_TWO_COLOR,
-        value: teamTwoSelection[i][1]
+        value: this.state.data.getSoloRating(teamTwoSelection[i])
       });
     }
     highlightHistogramMarker(this.randomMapDiv, soloRandomMapColorInfo);
@@ -259,13 +260,13 @@ export default class extends Component {
     for (let i = 0; i < teamOneSelection.length; i++) {
       teamRandomMapColorInfo.push({
         color: TEAM_ONE_COLOR,
-        value: teamOneSelection[i][2]
+        value: this.state.data.getTeamRating(teamOneSelection[i])
       });
     }
     for (let i = 0; i < teamTwoSelection.length; i++) {
       teamRandomMapColorInfo.push({
         color: TEAM_TWO_COLOR,
-        value: teamTwoSelection[i][2]
+        value: this.state.data.getTeamRating(teamTwoSelection[i])
       });
     }
     highlightHistogramMarker(this.teamRandomMapDiv, teamRandomMapColorInfo);
@@ -275,21 +276,75 @@ export default class extends Component {
     for (let i = 0; i < teamOneSelection.length; i++) {
       scatterPlotColorInfo.push({
         color: TEAM_ONE_COLOR,
-        valueX: teamOneSelection[i][1],
-        valueY: teamOneSelection[i][2]
+        valueX: this.state.data.getSoloRating(teamOneSelection[i]),
+        valueY: this.state.data.getTeamRating(teamOneSelection[i])
       });
     }
     for (let i = 0; i < teamTwoSelection.length; i++) {
       scatterPlotColorInfo.push({
         color: TEAM_TWO_COLOR,
-        valueX: teamTwoSelection[i][1],
-        valueY: teamTwoSelection[i][2]
+        valueX: this.state.data.getSoloRating(teamTwoSelection[i]),
+        valueY: this.state.data.getTeamRating(teamTwoSelection[i])
       });
     }
     highlightScatterplotMarker(this.scatterplotDiv, scatterPlotColorInfo);
   }
 
   render() {
+    let table = null;
+    if (this.state.teamOne.length !== 0 || this.state.teamTwo.length !== 0) {
+      table = (
+        <div>
+          <div>
+            <table
+              class="tg"
+              style={{
+                fontSize: "12px",
+                width: "100%",
+                tableLayout: "fixed",
+                overflow: "hidden",
+                textAlign: "center",
+                borderCollapse: "collapse"
+              }}
+            >
+              <tr>
+                <th rowSpan="2" width="28%"></th>
+                <th colSpan="2" width="24%">
+                  1v1
+                </th>
+                <th colSpan="2" width="24%">
+                  Team
+                </th>
+                <th colSpan="2" width="24%">
+                  Combo*
+                </th>
+              </tr>
+              <tr>
+                <td width="12%">Rating</td>
+                <td width="12%">%</td>
+                <td width="12%">Rating</td>
+                <td width="12%">%</td>
+                <td width="12%">Rating</td>
+                <td width="12%">%</td>
+              </tr>
+            </table>
+          </div>
+          <TeamTable
+            teamLabel="Team 1"
+            data={this.state.data}
+            players={this.state.teamOne}
+            color={TEAM_ONE_COLOR}
+          ></TeamTable>
+          <TeamTable
+            teamLabel="Team 2"
+            data={this.state.data}
+            players={this.state.teamTwo}
+            color={TEAM_TWO_COLOR}
+          ></TeamTable>
+        </div>
+      );
+    }
+
     return (
       <html>
         <head>
@@ -304,7 +359,7 @@ export default class extends Component {
           ></script>
         </head>
         <body style={{ fontFamily: FONT }}>
-          <div id="center">
+          <div class={styles.center}>
             <div
               id="loading"
               style={{
@@ -346,9 +401,16 @@ export default class extends Component {
                 >
                   <Select
                     id="teamOne"
-                    dataSet={this.props.histogram}
+                    dataSet={this.state.data}
+                    blacklist={this.state.teamTwo}
                     onSelection={function(selection) {
-                      this.setState({ teamOne: selection });
+                      // This setTimeout seems to help responsiveness
+                      setTimeout(
+                        function() {
+                          this.setState({ teamOne: selection });
+                        }.bind(this),
+                        1
+                      );
                     }.bind(this)}
                   ></Select>
                 </div>
@@ -364,20 +426,29 @@ export default class extends Component {
                 >
                   <Select
                     id="teamTwo"
-                    dataSet={this.props.histogram}
+                    dataSet={this.state.data}
+                    blacklist={this.state.teamOne}
                     onSelection={function(selection) {
-                      this.setState({ teamTwo: selection });
+                      // This setTimeout seems to help responsiveness
+                      setTimeout(
+                        function() {
+                          this.setState({ teamTwo: selection });
+                        }.bind(this),
+                        1
+                      );
                     }.bind(this)}
                   ></Select>
                 </div>
               </div>
             </div>
-            <div id="table"></div>
+            <hr class={styles.divider}></hr>
+            <div id="table">{table}</div>
+            <hr class={styles.divider}></hr>
             <div id="random_map_histogram"></div>
             <div id="team_random_map_histogram"></div>
             <div id="combo_scatterplot"></div>
-
             <div id="footer" style={{ fontSize: "12px" }}>
+              * Combo rating = Sqrt(RandomMapRating^2 + TeamRandomMapRating^2)
               <div id="last_updated"></div>
               View source code on{" "}
               <a href="https://github.com/thbrown/aoe2-de-elo-histogram">
@@ -466,27 +537,19 @@ export async function getStaticProps(context) {
       teamRandomMapLeaderbaord.length
     );
 
-    let histogramData = [];
+    let allData = [];
     for (const property in aoeData) {
-      histogramData.push(aoeData[property]);
-
-      // Only use the first 1000 entries in development for speed
-      if (DEVELOP && histogramData.length >= 1000) {
-        break;
-      }
+      allData.push([property].concat(aoeData[property]));
     }
 
-    console.log("Total number of ranked players", histogramData.length);
-
-    // Whatever happens after this takes forever, make sure the person who kicked off the build knows it's not hanging
-    console.log(
-      "Doing nextjs stuff, this next step may take a few minutes if using all the players. Please be patient..."
-    );
+    console.log("Total number of ranked players", allData.length);
+    console.log("Doing nextjs stuff...");
 
     // the return value will be passed to the page component as props
     return {
       props: {
-        histogram: histogramData,
+        // Nextjs is inexplicably slow if 'allData' is passed as an array so we'll serialize it ourselves
+        data: JSON.stringify(allData),
         timestamp: updatedTime,
         xmin: xmin,
         xmax: xmax
