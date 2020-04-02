@@ -1,0 +1,15 @@
+.teamTable th {
+  font-weight: normal;
+  overflow: hidden;
+}
+
+.teamTable {
+  border: 4px;
+  border-style: solid;
+  margin-bottom: 10px;
+  border-radius: 7px;
+}
+
+.teamAvgRow {
+  font-style: italic;
+}

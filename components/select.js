@@ -6,6 +6,7 @@ class Select extends React.Component {
 
   handleInputChange = selection => {
     // We only want to pass up the values, not the lables
+
     selection = selection ? selection : [];
     let selectionValuesOnly = [];
     for (let i = 0; i < selection.length; i++) {
@@ -14,11 +15,13 @@ class Select extends React.Component {
     this.props.onSelection(selectionValuesOnly);
   };
 
-  promiseOptions = query =>
-    new Promise(resolve => {
+  promiseOptions = query => {
+    let data = this.props.dataSet ? this.props.dataSet.getSelectData() : [];
+    return new Promise(resolve => {
       let worker = new Worker("worker.js");
       let args = {
-        data: this.props.dataSet,
+        data: data,
+        blacklist: this.props.blacklist,
         query: query,
         limit: 10
       };
@@ -31,6 +34,7 @@ class Select extends React.Component {
         false
       );
     });
+  };
 
   render() {
     return (
@@ -40,6 +44,7 @@ class Select extends React.Component {
         defaultOptions
         loadOptions={this.promiseOptions.bind(this)}
         onChange={this.handleInputChange.bind(this)}
+        noOptionsMessage={() => "Type a player's name"}
       />
     );
   }
