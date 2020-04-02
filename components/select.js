@@ -4,9 +4,30 @@ import AsyncSelect from "react-select/async";
 class Select extends React.Component {
   state = { selection: undefined };
 
+  componentDidUpdate(prevProps) {
+    if (
+      this.props.value &&
+      this.props.dataSet &&
+      prevProps.value != this.props.value
+    ) {
+      let values = this.props.value.filter(steamId =>
+        this.props.dataSet.exists(steamId)
+      );
+      let newSelectionState = [];
+      for (let i = 0; i < values.length; i++) {
+        let steamId = values[i];
+        newSelectionState.push({
+          label: this.props.dataSet.getName(steamId),
+          value: steamId
+        });
+      }
+      this.setState({ selection: newSelectionState });
+    }
+  }
+
   handleInputChange = selection => {
     // We only want to pass up the values, not the lables
-
+    this.setState({ selection });
     selection = selection ? selection : [];
     let selectionValuesOnly = [];
     for (let i = 0; i < selection.length; i++) {
@@ -17,6 +38,7 @@ class Select extends React.Component {
 
   promiseOptions = query => {
     let data = this.props.dataSet ? this.props.dataSet.getSelectData() : [];
+
     return new Promise(resolve => {
       let worker = new Worker("worker.js");
       let args = {
@@ -45,6 +67,7 @@ class Select extends React.Component {
         loadOptions={this.promiseOptions.bind(this)}
         onChange={this.handleInputChange.bind(this)}
         noOptionsMessage={() => "Type a player's name"}
+        value={this.state.selection}
       />
     );
   }

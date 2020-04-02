@@ -146,6 +146,10 @@ class Data {
     return this.soloData;
   }
 
+  exists(steamId) {
+    return Boolean(this.data[steamId]);
+  }
+
   getName(steamId) {
     return this.data[steamId][NAME];
   }

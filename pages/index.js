@@ -26,7 +26,7 @@ TODO:
 4) Variable names...
 7) "Trace 2" on hover
 12) URL change when players are selected
-13) Select box turns blue whenh selected instead of team color
+13) Select box turns blue when selected instead of team color
 14) Color chips in select box
 15) There are a different number of buckets in each histogram
 */
@@ -230,14 +230,29 @@ export default class extends Component {
         this.teamRandomMapDiv = values[1];
         this.scatterplotDiv = values[2];
 
-        this.setState({ data: dataSet });
+        let queryString = window.location.search;
+        let parsed = parseQueryString(queryString);
+        this.setState({
+          data: dataSet,
+          teamOne: parsed.team_one ? parsed.team_one.split("-") : [],
+          teamTwo: parsed.team_two ? parsed.team_two.split("-") : []
+        });
       }.bind(this)
     );
   }
 
   componentDidUpdate() {
-    let teamOneSelection = this.state.teamOne ? this.state.teamOne : [];
-    let teamTwoSelection = this.state.teamTwo ? this.state.teamTwo : [];
+    // Don't update the graphs if they were never ready to beign with
+    if (!this.randomMapDiv || !this.teamRandomMapDiv || !this.scatterplotDiv) {
+      return;
+    }
+
+    let teamOneSelection = this.state.teamOne
+      ? this.state.teamOne.filter(steamId => this.state.data.exists(steamId))
+      : [];
+    let teamTwoSelection = this.state.teamTwo
+      ? this.state.teamTwo.filter(steamId => this.state.data.exists(steamId))
+      : [];
 
     // Update 1v1 random map
     let soloRandomMapColorInfo = [];
@@ -403,6 +418,7 @@ export default class extends Component {
                     id="teamOne"
                     dataSet={this.state.data}
                     blacklist={this.state.teamTwo}
+                    value={this.state.teamOne}
                     onSelection={function(selection) {
                       // This setTimeout seems to help responsiveness
                       setTimeout(
@@ -411,6 +427,16 @@ export default class extends Component {
                         }.bind(this),
                         1
                       );
+                      if (history) {
+                        history.pushState(
+                          null,
+                          "",
+                          "?team_one=" +
+                            selection.join("-") +
+                            "&team_two=" +
+                            this.state.teamTwo.join("-")
+                        );
+                      }
                     }.bind(this)}
                   ></Select>
                 </div>
@@ -428,6 +454,7 @@ export default class extends Component {
                     id="teamTwo"
                     dataSet={this.state.data}
                     blacklist={this.state.teamOne}
+                    value={this.state.teamTwo}
                     onSelection={function(selection) {
                       // This setTimeout seems to help responsiveness
                       setTimeout(
@@ -436,6 +463,16 @@ export default class extends Component {
                         }.bind(this),
                         1
                       );
+                      if (history) {
+                        history.pushState(
+                          null,
+                          "",
+                          "?team_one=" +
+                            this.state.teamOne.join("-") +
+                            "&team_two=" +
+                            selection.join("-")
+                        );
+                      }
                     }.bind(this)}
                   ></Select>
                 </div>
@@ -755,4 +792,17 @@ function highlightScatterplotMarker(chartElement, values) {
     newTraces.push(trace);
   }
   Plotly.addTraces(chartElement, newTraces);
+}
+
+function parseQueryString(queryString) {
+  var query = {};
+  var pairs = (queryString[0] === "?"
+    ? queryString.substr(1)
+    : queryString
+  ).split("&");
+  for (var i = 0; i < pairs.length; i++) {
+    var pair = pairs[i].split("=");
+    query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || "");
+  }
+  return query;
 }

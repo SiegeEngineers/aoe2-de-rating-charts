@@ -29,10 +29,10 @@ class TeamTable extends React.Component {
   }
 
   render() {
-    const players = this.props.players;
+    const data = this.props.data;
+    const players = this.props.players.filter(steamId => data.exists(steamId));
     const color = this.props.color;
     const teamLabel = this.props.teamLabel;
-    const data = this.props.data;
 
     // Don't show this table if there are no players selected
     if (players.length === 0 || !players) {
@@ -41,6 +41,7 @@ class TeamTable extends React.Component {
 
     const items = [];
 
+    console.log("PLAYERS", players);
     for (let i = 0; i < players.length; i++) {
       let steamId = players[i];
       let name = data.getName(steamId);
