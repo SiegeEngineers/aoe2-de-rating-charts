@@ -3,7 +3,7 @@ import Select from "../components/select.js";
 import TeamTable from "../components/team-table.js";
 
 import Data from "../helpers/data.js";
-
+import AnnotationSeparator from "../helpers/annotation-separator.js";
 import styles from "./index.module.css";
 
 const got = require("got");
@@ -19,13 +19,13 @@ const AXIS_FONT_SIZE = 14;
 const AXIS_FONT_COLOR = "#7f7f7f";
 const TITLE_FONT_SIZE = 18;
 const FONT = "Roboto, Arial, sans-serif";
+const MIN_ANNOTATION_DISTANCE_FROM_VALUE = 100;
 
 /*
 TODO:
 3) What if multiple players on different teams map to the same bucket?
 4) Variable names...
 7) "Trace 2" on hover
-12) URL change when players are selected
 13) Select box turns blue when selected instead of team color
 14) Color chips in select box
 15) There are a different number of buckets in each histogram
@@ -40,9 +40,9 @@ export default class extends Component {
 
   componentDidMount() {
     let dataSet = new Data(this.props.data);
-    let histogramArray = []; //JSON.parse(this.props.histogram);
+    let histogramArray = []; // JSON.parse(this.props.histogram);
     let timestamp = this.props.timestamp ? this.props.timestamp : 0;
-    let xmin = this.props.xmin;
+    let xmin = this.props.xmin; // TODO: remove the 'x' there are just absolute max and min values
     let xmax = this.props.xmax;
 
     // Random Map Histogram
@@ -259,13 +259,15 @@ export default class extends Component {
     for (let i = 0; i < teamOneSelection.length; i++) {
       soloRandomMapColorInfo.push({
         color: TEAM_ONE_COLOR,
-        value: this.state.data.getSoloRating(teamOneSelection[i])
+        value: this.state.data.getSoloRating(teamOneSelection[i]),
+        name: this.state.data.getName(teamOneSelection[i])
       });
     }
     for (let i = 0; i < teamTwoSelection.length; i++) {
       soloRandomMapColorInfo.push({
         color: TEAM_TWO_COLOR,
-        value: this.state.data.getSoloRating(teamTwoSelection[i])
+        value: this.state.data.getSoloRating(teamTwoSelection[i]),
+        name: this.state.data.getName(teamTwoSelection[i])
       });
     }
     highlightHistogramMarker(this.randomMapDiv, soloRandomMapColorInfo);
@@ -275,13 +277,15 @@ export default class extends Component {
     for (let i = 0; i < teamOneSelection.length; i++) {
       teamRandomMapColorInfo.push({
         color: TEAM_ONE_COLOR,
-        value: this.state.data.getTeamRating(teamOneSelection[i])
+        value: this.state.data.getTeamRating(teamOneSelection[i]),
+        name: this.state.data.getName(teamOneSelection[i])
       });
     }
     for (let i = 0; i < teamTwoSelection.length; i++) {
       teamRandomMapColorInfo.push({
         color: TEAM_TWO_COLOR,
-        value: this.state.data.getTeamRating(teamTwoSelection[i])
+        value: this.state.data.getTeamRating(teamTwoSelection[i]),
+        name: this.state.data.getName(teamTwoSelection[i])
       });
     }
     highlightHistogramMarker(this.teamRandomMapDiv, teamRandomMapColorInfo);
@@ -292,14 +296,16 @@ export default class extends Component {
       scatterPlotColorInfo.push({
         color: TEAM_ONE_COLOR,
         valueX: this.state.data.getSoloRating(teamOneSelection[i]),
-        valueY: this.state.data.getTeamRating(teamOneSelection[i])
+        valueY: this.state.data.getTeamRating(teamOneSelection[i]),
+        name: this.state.data.getName(teamOneSelection[i])
       });
     }
     for (let i = 0; i < teamTwoSelection.length; i++) {
       scatterPlotColorInfo.push({
         color: TEAM_TWO_COLOR,
         valueX: this.state.data.getSoloRating(teamTwoSelection[i]),
-        valueY: this.state.data.getTeamRating(teamTwoSelection[i])
+        valueY: this.state.data.getTeamRating(teamTwoSelection[i]),
+        name: this.state.data.getName(teamTwoSelection[i])
       });
     }
     highlightScatterplotMarker(this.scatterplotDiv, scatterPlotColorInfo);
@@ -685,7 +691,7 @@ async function getLeaderboardData(leaderboardId) {
   };
 }
 
-// Accepts values in the form {color: "rgb(31, 119, 180)", value: 1066}
+// Accepts values in the form {color: "rgb(31, 119, 180)", value: 1066, name:"GusTTShowbiz"}
 function highlightHistogramMarker(chartElement, values) {
   let numberOfBuckets = chartElement.calcdata[0].length;
 
@@ -719,6 +725,7 @@ function highlightHistogramMarker(chartElement, values) {
       values[valueIndex].value <= chartElement.calcdata[0][i].ph1
     ) {
       bucketColors[i] = colors[values[valueIndex].color];
+      values[valueIndex].bucketIndex = i;
       valueIndex++;
     }
 
@@ -736,14 +743,15 @@ function highlightHistogramMarker(chartElement, values) {
     colorscale.push(localArray);
   }
 
-  let update = {};
+  let styleUpdate = {};
   if (colorscale.length == 1) {
-    update = {
+    // If there is just one color for all the markers, just set the color directly. Using a size one array here doesn't work.
+    styleUpdate = {
       "marker.color": colorscale[0][1]
     };
   } else {
     // Update the color of specific markers on the 0th trace
-    update = {
+    styleUpdate = {
       "marker.color": [bucketColors],
       "marker.colorscale": [colorscale],
       "marker.cmax": maxValueInBucketColors,
@@ -751,10 +759,52 @@ function highlightHistogramMarker(chartElement, values) {
     };
   }
 
-  Plotly.restyle(chartElement, update, 0);
+  Plotly.restyle(chartElement, styleUpdate, 0);
+
+  // Add the annotations!
+  let rangeX =
+    chartElement.layout.xaxis.range[1] - chartElement.layout.xaxis.range[0];
+  let rangeY =
+    chartElement.layout.yaxis.range[1] - chartElement.layout.yaxis.range[0];
+  let annotations = [];
+  for (let i = 0; i < values.length; i++) {
+    if (values[i].value) {
+      let entry = {
+        text: values[i].name,
+        x: values[i].value,
+        y: chartElement.calcdata[0][values[i].bucketIndex].s,
+        ax: values[i].value,
+        ay: chartElement.calcdata[0][values[i].bucketIndex].s + rangeX / 15,
+        axref: "x",
+        ayref: "y",
+        bgcolor: "rgba(255, 255, 255, 0.9)",
+        arrowcolor: "rgba(0, 0, 0, 0.9)",
+        font: { size: 12 },
+        bordercolor: values[i].color,
+        borderwidth: 1,
+        arrowsize: 1,
+        arrowwidth: 1
+      };
+      annotations.push(entry);
+    }
+  }
+
+  let seperator = new AnnotationSeparator(
+    annotations,
+    chartElement.layout.xaxis.range[0],
+    chartElement.layout.xaxis.range[1],
+    chartElement.layout.yaxis.range[0],
+    chartElement.layout.yaxis.range[1],
+    rangeX / 5,
+    rangeY / 15
+  );
+  let layoutUpdate = {
+    annotations: seperator.getSeparatedAnnotations()
+  };
+  Plotly.relayout(chartElement, layoutUpdate);
 }
 
-// Accepts values in the form {color: "rgb(31, 119, 180)", valueX: 1066, valueY: 1442}
+// Accepts values in the form {color: "rgb(31, 119, 180)", valueX: 1066, valueY: 1442, name:"PizzaBob"}
 function highlightScatterplotMarker(chartElement, values) {
   // Determine the number of unique colors - one trace per color
   let counter = 0;
@@ -792,6 +842,47 @@ function highlightScatterplotMarker(chartElement, values) {
     newTraces.push(trace);
   }
   Plotly.addTraces(chartElement, newTraces);
+
+  // Add the annotations!
+  let rangeX =
+    chartElement.layout.xaxis.range[1] - chartElement.layout.xaxis.range[0];
+  let rangeY =
+    chartElement.layout.yaxis.range[1] - chartElement.layout.yaxis.range[0];
+  let annotations = [];
+  for (let i = 0; i < values.length; i++) {
+    if (values[i].valueX && values[i].valueY) {
+      let entry = {
+        text: values[i].name,
+        x: values[i].valueX,
+        y: values[i].valueY,
+        ax: values[i].valueX,
+        ay: values[i].valueY + rangeY / 15,
+        axref: "x",
+        ayref: "y",
+        bgcolor: "rgba(255, 255, 255, 0.9)",
+        arrowcolor: "rgba(0, 0, 0, 0.9)",
+        font: { size: 12 },
+        bordercolor: values[i].color,
+        borderwidth: 1,
+        arrowsize: 1,
+        arrowwidth: 1
+      };
+      annotations.push(entry);
+    }
+  }
+  let seperator = new AnnotationSeparator(
+    annotations,
+    chartElement.layout.xaxis.range[0],
+    chartElement.layout.xaxis.range[1],
+    chartElement.layout.yaxis.range[0],
+    chartElement.layout.yaxis.range[1],
+    rangeX / 5,
+    rangeY / 15
+  );
+  let update = {
+    annotations: seperator.getSeparatedAnnotations()
+  };
+  Plotly.relayout(chartElement, update);
 }
 
 function parseQueryString(queryString) {

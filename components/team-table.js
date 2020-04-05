@@ -41,7 +41,6 @@ class TeamTable extends React.Component {
 
     const items = [];
 
-    console.log("PLAYERS", players);
     for (let i = 0; i < players.length; i++) {
       let steamId = players[i];
       let name = data.getName(steamId);
