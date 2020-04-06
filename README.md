@@ -1,6 +1,6 @@
 # Age of Empires 2: Definitive Edition Rating Charts
 
-Live at: https://thbrown.github.io/aoe2-de-elo-histogram/
+Live at: https://thbrown.github.io/aoe2-de-rating-charts/
 
 Stats are updated every day.
 
