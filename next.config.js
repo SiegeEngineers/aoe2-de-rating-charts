@@ -1,22 +1,22 @@
 const debug = process.env.NODE_ENV !== "production";
 
 module.exports = {
-  exportPathMap: function () {
+  exportPathMap: function() {
     return {
-      "/": { page: "/" },
-    }
+      "/": { page: "/" }
+    };
   },
-  assetPrefix: !debug ? '/aoe2-de-elo-histogram' : '',
+  assetPrefix: !debug ? "/aoe2-de-rating-charts" : "",
   webpack: (config, { dev }) => {
     // Perform customizations to webpack config
-    console.log('webpack');
+    console.log("webpack");
     config.module.rules = config.module.rules.map(rule => {
-      if(rule.loader === 'babel-loader') {
-        rule.options.cacheDirectory = false
+      if (rule.loader === "babel-loader") {
+        rule.options.cacheDirectory = false;
       }
-      return rule
-    })
+      return rule;
+    });
     // Important: return the modified config
-    return config
+    return config;
   }
-}
+};
