@@ -26,7 +26,7 @@ The static site is exported to `/docs`.
 
 ## Testing the production build
 
-To make this work, you'll have to replace the references to "aoe2-de-elo-histogram" in env-config.js and next.config.js with "" (blank)
+To make this work, you'll have to replace the references to "aoe2-de-rating-charts" in env-config.js and next.config.js with "" (blank)
 
 After that, you can see the production static app using a webserver.
 
