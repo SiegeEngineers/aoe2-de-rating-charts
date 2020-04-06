@@ -67,7 +67,7 @@ export default class extends Component {
         l: 50,
         r: 15,
         t: 50,
-        b: 30
+        b: 40
       },
       xaxis: {
         title: {
@@ -129,7 +129,7 @@ export default class extends Component {
         l: 50,
         r: 15,
         t: 50,
-        b: 30
+        b: 40
       },
       xaxis: {
         title: {
@@ -200,11 +200,11 @@ export default class extends Component {
         l: 50,
         r: 15,
         t: 50,
-        b: 30
+        b: 40
       },
       xaxis: {
         title: {
-          text: "1v1 Random Map Rating",
+          text: "1v1 Rating",
           font: {
             family: FONT,
             size: AXIS_FONT_SIZE,
@@ -216,7 +216,7 @@ export default class extends Component {
       },
       yaxis: {
         title: {
-          text: "Team Random Map Rating",
+          text: "Team Rating",
           font: {
             family: FONT,
             size: AXIS_FONT_SIZE,
@@ -405,7 +405,7 @@ export default class extends Component {
           ></script>
         </head>
         <body style={{ fontFamily: FONT }}>
-          <div class={styles.center}>
+          <div className={styles.center}>
             <div
               id="loading"
               style={{
@@ -417,7 +417,7 @@ export default class extends Component {
               }}
             >
               <img
-                src={process.env.BACKEND_URL + "/puff.svg"}
+                src={"/puff.svg"}
                 alt="Loading..."
                 style={{
                   backgroundColor: "black",
@@ -525,7 +525,7 @@ export default class extends Component {
             <div id="random_map_histogram"></div>
             <div id="team_random_map_histogram"></div>
             <div id="combo_scatterplot"></div>
-            <div id="footer" style={{ fontSize: "12px" }}>
+            <div id="footer" style={{ fontSize: "12px", margin: "10px" }}>
               <div id="last_updated"></div>* Combo rating =
               Sqrt(RandomMapRating^2 + TeamRandomMapRating^2)
               <br></br>
