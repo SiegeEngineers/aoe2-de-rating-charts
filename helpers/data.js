@@ -54,7 +54,7 @@ class Data {
         this.totalTeamPlayers++;
       }
 
-      if (soloRating && soloRating) {
+      if (soloRating && teamRating) {
         this.totalBothPlayers++;
       }
     }
@@ -123,6 +123,12 @@ class Data {
       this.teamData.push(this.getTeamRating(steamIds[i]));
     }
 
+    // Precalculate names
+    this.names = [];
+    for (let i = 0; i < steamIds.length; i++) {
+      this.names.push(this.getName(steamIds[i]));
+    }
+
     // Precalculate Select data
     this.selectData = [];
     for (let i = 0; i < steamIds.length; i++) {
@@ -144,6 +150,10 @@ class Data {
 
   getAllSoloRatings() {
     return this.soloData;
+  }
+
+  getAllNames() {
+    return this.names;
   }
 
   exists(steamId) {

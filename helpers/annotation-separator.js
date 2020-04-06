@@ -6,34 +6,35 @@ Number.prototype.clamp = function(min, max) {
   return Math.min(Math.max(this, min), max);
 };
 
-const MAX_ITERATIONS = 100;
+const MAX_ITERATIONS = 25;
 const LOGGING = false;
 
 class AnnotationSeparator {
-  constructor(
-    inputAnnotations,
-    minX,
-    maxX,
-    minY,
-    maxY,
-    annotationWidth,
-    annotationHeight
-  ) {
+  constructor(inputAnnotations, minX, maxX, minY, maxY) {
     this.inputAnnotations = inputAnnotations;
 
-    this.minX = minX;
-    this.maxX = maxX - annotationWidth / 2;
-    this.rangeX = this.maxX - this.minX;
+    let rangeX = maxX - minX;
+    let rangeY = maxY - minY;
+
+    this.annotationWidth = rangeX / 5;
+    this.annotationHeight = rangeY / 10;
+
+    // Max and min include a margin
+    this.minX = minX + this.annotationWidth / 2;
+    this.maxX = maxX - this.annotationWidth / 2;
 
     this.minY = minY;
     this.maxY = maxY;
-    this.rangeY = maxY - minY;
 
-    this.numberOfXPartitions = Math.trunc(this.rangeX / annotationWidth);
-    this.numberOfYPartitions = Math.trunc(this.rangeY / annotationHeight);
+    let rangeWithMarginX = this.maxX - this.minX;
+    let rangeWithMarginY = this.maxY - this.minY;
 
-    this.annotationWidth = annotationWidth;
-    this.annotationHeight = annotationHeight;
+    this.numberOfXPartitions = Math.trunc(
+      rangeWithMarginX / this.annotationWidth
+    );
+    this.numberOfYPartitions = Math.trunc(
+      rangeWithMarginY / this.annotationHeight
+    );
 
     this.usedIndexes = new Set();
   }
@@ -70,37 +71,15 @@ class AnnotationSeparator {
     let iterations = 0;
     let active = null;
     let activeStringRepresentation = null;
-
+    if (LOGGING) {
+      console.log("Positioning", annotation.text);
+    }
     while (iterations < MAX_ITERATIONS) {
       active = generator.next().value;
       if (active == null) {
         return null;
       }
       activeStringRepresentation = JSON.stringify(active);
-
-      // Not too close to data point
-      let arrowXCoord = this.getCoordinatesFromPartitionIndex(
-        active.x,
-        this.minX,
-        this.annotationWidth
-      );
-      let arrowYCoord = this.getCoordinatesFromPartitionIndex(
-        active.y,
-        this.minY,
-        this.annotationHeight
-      );
-      let selfDistance = Math.sqrt(
-        Math.pow(annotation.x - arrowXCoord, 2) +
-          Math.pow(annotation.y - arrowYCoord, 2)
-      );
-      const MIN_DISTANCE_TO_OWN_DATA_POINTS = this.annotationHeight;
-      if (selfDistance < MIN_DISTANCE_TO_OWN_DATA_POINTS) {
-        if (LOGGING) {
-          console.log("REJECTED: too close to own data point ", selfDistance);
-        }
-        iterations++;
-        continue;
-      }
 
       // Not taken by another annotation
       if (this.usedIndexes.has(activeStringRepresentation)) {
@@ -114,18 +93,36 @@ class AnnotationSeparator {
         continue;
       }
 
-      // Not too close to any other datapoint
+      // Not too close to any other datapoint (including our own)
+      let arrowXCoord = this.getCoordinatesFromPartitionIndex(
+        active.x,
+        this.minX,
+        this.annotationWidth
+      );
+      let arrowYCoord = this.getCoordinatesFromPartitionIndex(
+        active.y,
+        this.minY,
+        this.annotationHeight
+      );
       let overlapingDataPoint = false;
       for (let i = 0; i < annotations.length; i++) {
         let otherAnnotation = annotations[i];
-        let distance = Math.sqrt(
-          Math.pow(otherAnnotation.x - arrowXCoord, 2) +
-            Math.pow(otherAnnotation.y - arrowYCoord, 2)
-        );
-        const MIN_DISTANCE_TO_OTHER_DATA_POINTS = this.annotationWidth / 2;
-        if (distance < MIN_DISTANCE_TO_OTHER_DATA_POINTS) {
+        let xDistance = Math.abs(otherAnnotation.x - arrowXCoord);
+        let yDistance = Math.abs(otherAnnotation.y - arrowYCoord);
+        const MIN_DISTANCE_TO_OTHER_DATA_POINTS_X = this.annotationWidth / 2.1;
+        const MIN_DISTANCE_TO_OTHER_DATA_POINTS_Y = this.annotationHeight / 2.1;
+        if (
+          xDistance < MIN_DISTANCE_TO_OTHER_DATA_POINTS_X &&
+          yDistance < MIN_DISTANCE_TO_OTHER_DATA_POINTS_Y
+        ) {
           if (LOGGING) {
-            console.log("REJECTED: overlaping datapoint", otherAnnotation.text);
+            console.log(
+              "REJECTED: overlaping datapoint ",
+              otherAnnotation.text,
+              activeStringRepresentation,
+              xDistance,
+              yDistance
+            );
           }
           iterations++;
           overlapingDataPoint = true;
@@ -157,7 +154,27 @@ class AnnotationSeparator {
   }
 
   // This generator function is an implementation of breath first search
-  *getNextNearestPartitionIndexes(indexX, indexY, xmin, ymin, xmax, ymax) {
+  *getNextNearestPartitionIndexes(
+    indexX,
+    indexY,
+    xminIndex,
+    yminIndex,
+    xmaxIndex,
+    ymaxIndex
+  ) {
+    // clamp to max and min
+    if (indexX < xminIndex) {
+      indexX = xminIndex;
+    } else if (indexX > xmaxIndex) {
+      indexX = xmaxIndex;
+    }
+
+    if (indexY < yminIndex) {
+      indexY = yminIndex;
+    } else if (indexY > ymaxIndex) {
+      indexY = ymaxIndex;
+    }
+
     let queue = [{ x: indexX, y: indexY }];
 
     let visited = new Set();
@@ -184,10 +201,10 @@ class AnnotationSeparator {
         // Add the neighbor the the queue if we haven't visited it already AND they are in the valid range
         if (!visited.has(neighborStringRepresentation)) {
           if (
-            neighbor.x >= xmin &&
-            neighbor.x <= xmax &&
-            neighbor.y >= ymin &&
-            neighbor.y <= ymax
+            neighbor.x >= xminIndex &&
+            neighbor.x <= xmaxIndex &&
+            neighbor.y >= yminIndex &&
+            neighbor.y <= ymaxIndex
           ) {
             visited.add(neighborStringRepresentation);
             queue.push(neighbor);

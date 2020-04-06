@@ -19,16 +19,14 @@ const AXIS_FONT_SIZE = 14;
 const AXIS_FONT_COLOR = "#7f7f7f";
 const TITLE_FONT_SIZE = 18;
 const FONT = "Roboto, Arial, sans-serif";
-const MIN_ANNOTATION_DISTANCE_FROM_VALUE = 100;
 
 /*
 TODO:
 3) What if multiple players on different teams map to the same bucket?
 4) Variable names...
-7) "Trace 2" on hover
 13) Select box turns blue when selected instead of team color
 14) Color chips in select box
-15) There are a different number of buckets in each histogram
+15) Are a different number of buckets in each histogram?
 */
 
 export default class extends Component {
@@ -52,7 +50,8 @@ export default class extends Component {
       type: "histogram",
       marker: {
         color: DEFAULT_COLOR
-      }
+      },
+      hovertemplate: "# of Players: %{y}<extra></extra>"
     };
     var layout = {
       title: {
@@ -79,7 +78,8 @@ export default class extends Component {
             color: AXIS_FONT_COLOR
           }
         },
-        range: [xmin, xmax]
+        range: [xmin, xmax],
+        fixedrange: true
       },
       yaxis: {
         title: {
@@ -89,14 +89,17 @@ export default class extends Component {
             size: AXIS_FONT_SIZE,
             color: AXIS_FONT_COLOR
           }
-        }
+        },
+        fixedrange: true
       },
       marker: { color: DEFAULT_COLOR }
     };
     var data = [trace];
     let randomMapPlot = Plotly.newPlot("random_map_histogram", data, layout, {
       scrollZoom: false,
-      responsive: true
+      responsive: true,
+      showLink: true,
+      plotlyServerURL: "https://chart-studio.plotly.com"
     });
 
     // Team Random Map Histogram
@@ -109,7 +112,8 @@ export default class extends Component {
       type: "histogram",
       marker: {
         color: DEFAULT_COLOR
-      }
+      },
+      hovertemplate: "# of Players: %{y}<extra></extra>"
     };
     var layout = {
       title: {
@@ -136,7 +140,8 @@ export default class extends Component {
             color: AXIS_FONT_COLOR
           }
         },
-        range: [xmin, xmax]
+        range: [xmin, xmax],
+        fixedrange: true
       },
       yaxis: {
         title: {
@@ -146,7 +151,8 @@ export default class extends Component {
             size: AXIS_FONT_SIZE,
             color: AXIS_FONT_COLOR
           }
-        }
+        },
+        fixedrange: true
       }
     };
     var data = [trace];
@@ -154,20 +160,27 @@ export default class extends Component {
       "team_random_map_histogram",
       data,
       layout,
-      { scrollZoom: false, responsive: true }
+      {
+        scrollZoom: false,
+        responsive: true,
+        showLink: true,
+        plotlyServerURL: "https://chart-studio.plotly.com"
+      }
     );
 
     // Combo Scatterplot
     var trace1 = {
       x: dataSet.getAllSoloRatings(),
       y: dataSet.getAllTeamRatings(),
+      text: dataSet.getAllNames(),
       mode: "markers",
       type: "scattergl",
       textposition: "top center",
       textfont: {
         family: FONT
       },
-      marker: { size: 2, color: DEFAULT_COLOR }
+      marker: { size: 2, color: DEFAULT_COLOR },
+      hovertemplate: "Name: %{text}<br>Team: %{y}<br>1v1: %{x}<extra></extra>"
     };
 
     var data = [trace1];
@@ -198,7 +211,8 @@ export default class extends Component {
             color: AXIS_FONT_COLOR
           }
         },
-        range: [xmin, xmax]
+        range: [xmin, xmax],
+        fixedrange: true
       },
       yaxis: {
         title: {
@@ -208,17 +222,28 @@ export default class extends Component {
             size: AXIS_FONT_SIZE,
             color: AXIS_FONT_COLOR
           }
-        }
+        },
+        fixedrange: true
       }
     };
 
     let scatterPlot = Plotly.newPlot("combo_scatterplot", data, layout, {
       scrollZoom: false,
-      responsive: true
+      responsive: true,
+      showLink: true,
+      plotlyServerURL: "https://chart-studio.plotly.com"
     });
 
     let lastUpdatedDiv = document.getElementById("last_updated");
-    lastUpdatedDiv.innerHTML = `Last updated on <i>${new Date(timestamp)}</i>`;
+    let date = new Date(timestamp);
+    try {
+      lastUpdatedDiv.innerHTML = `† Last updated on <i>${date.toLocaleString(
+        "default",
+        { timeZoneName: "short" }
+      )}</i>`;
+    } catch (e) {
+      return e instanceof RangeError;
+    }
 
     // Remove the loading div
     Promise.all([randomMapPlot, teamRandomMapPlot, scatterPlot]).then(
@@ -372,7 +397,7 @@ export default class extends Component {
           <title>Age of Empires II: Definitive Edition Rating Charts</title>
           <meta
             name="description"
-            content="Histograms and a scatterplot for 'Age of Empires II: Definitive Edition' 1v1 Random Map and Team Random Map."
+            content="Histograms and a scatterplot for 'Age of Empires II: Definitive Edition' 1v1 Random Map and Team Random Map ratings. Updated daily."
           />
           <script
             type="text/javascript"
@@ -392,7 +417,7 @@ export default class extends Component {
               }}
             >
               <img
-                src="/puff.svg"
+                src={process.env.BACKEND_URL + "/puff.svg"}
                 alt="Loading..."
                 style={{
                   backgroundColor: "black",
@@ -409,6 +434,16 @@ export default class extends Component {
             </div>
             <div>
               <h2>Age of Empires II: Definitive Edition Rating Charts</h2>
+              <div
+                id="subheader"
+                style={{
+                  paddingBottom: "16px",
+                  marginTop: "-16px",
+                  fontSize: "9pt"
+                }}
+              >
+                <i>Updated daily†</i>
+              </div>
             </div>
             <div id="selectors">
               <div>
@@ -491,8 +526,12 @@ export default class extends Component {
             <div id="team_random_map_histogram"></div>
             <div id="combo_scatterplot"></div>
             <div id="footer" style={{ fontSize: "12px" }}>
-              * Combo rating = Sqrt(RandomMapRating^2 + TeamRandomMapRating^2)
-              <div id="last_updated"></div>
+              <div id="last_updated"></div>* Combo rating =
+              Sqrt(RandomMapRating^2 + TeamRandomMapRating^2)
+              <br></br>
+              Players will only appear if they have played at least 10 ranked
+              games
+              <br></br>
               View source code on{" "}
               <a href="https://github.com/thbrown/aoe2-de-elo-histogram">
                 github
@@ -774,7 +813,7 @@ function highlightHistogramMarker(chartElement, values) {
         x: values[i].value,
         y: chartElement.calcdata[0][values[i].bucketIndex].s,
         ax: values[i].value,
-        ay: chartElement.calcdata[0][values[i].bucketIndex].s + rangeX / 15,
+        ay: chartElement.calcdata[0][values[i].bucketIndex].s + rangeX / 10, // We'd prefer the annotations above the data point
         axref: "x",
         ayref: "y",
         bgcolor: "rgba(255, 255, 255, 0.9)",
@@ -794,9 +833,7 @@ function highlightHistogramMarker(chartElement, values) {
     chartElement.layout.xaxis.range[0],
     chartElement.layout.xaxis.range[1],
     chartElement.layout.yaxis.range[0],
-    chartElement.layout.yaxis.range[1],
-    rangeX / 5,
-    rangeY / 15
+    chartElement.layout.yaxis.range[1]
   );
   let layoutUpdate = {
     annotations: seperator.getSeparatedAnnotations()
@@ -837,7 +874,8 @@ function highlightScatterplotMarker(chartElement, values) {
       mode: "markers",
       type: "scattergl",
       textposition: "top center",
-      marker: { size: 8, color: prop }
+      marker: { size: 8, color: prop },
+      hoverinfo: "skip"
     };
     newTraces.push(trace);
   }
@@ -856,7 +894,7 @@ function highlightScatterplotMarker(chartElement, values) {
         x: values[i].valueX,
         y: values[i].valueY,
         ax: values[i].valueX,
-        ay: values[i].valueY + rangeY / 15,
+        ay: values[i].valueY + rangeY / 10,
         axref: "x",
         ayref: "y",
         bgcolor: "rgba(255, 255, 255, 0.9)",
@@ -875,9 +913,7 @@ function highlightScatterplotMarker(chartElement, values) {
     chartElement.layout.xaxis.range[0],
     chartElement.layout.xaxis.range[1],
     chartElement.layout.yaxis.range[0],
-    chartElement.layout.yaxis.range[1],
-    rangeX / 5,
-    rangeY / 15
+    chartElement.layout.yaxis.range[1]
   );
   let update = {
     annotations: seperator.getSeparatedAnnotations()
