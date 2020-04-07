@@ -2,7 +2,7 @@
 
 Live at: https://thbrown.github.io/aoe2-de-rating-charts/
 
-Stats are updated every day.
+Stats are updated automatically, every day via github actions.
 
 ## Tech
 
@@ -33,6 +33,6 @@ After that, you can see the production static app using a webserver.
 For example:
 
 1. Install serve globally, you only need to do this once `npm install -g serve`
-1. Navigate the the site's root directory `cd ./out`
+1. Navigate the the site's root directory `cd ./docs`
 1. Serve the site `serve -p 8080`
 1. Visit `localhost:8080` in your browser
