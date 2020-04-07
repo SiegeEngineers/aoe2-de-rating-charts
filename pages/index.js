@@ -415,7 +415,7 @@ export default class extends Component {
             name="description"
             content="Histograms and a scatterplot for 'Age of Empires II: Definitive Edition' 1v1 Random Map and Team Random Map ratings. Updated daily."
           />
-          <meta property="og:image" content="https://i.imgur.com/9nVNw6U.png" />
+          <meta property="og:image" content="https://i.imgur.com/cVLgt68.png" />
           <script
             type="text/javascript"
             src="https://cdn.plot.ly/plotly-latest.min.js"
