@@ -289,10 +289,14 @@ export default class extends Component {
     }
 
     let teamOneSelection = this.state.teamOne
-      ? this.state.teamOne.filter(steamId => this.state.data.exists(steamId))
+      ? this.state.teamOne.filter(profileId =>
+          this.state.data.exists(profileId)
+        )
       : [];
     let teamTwoSelection = this.state.teamTwo
-      ? this.state.teamTwo.filter(steamId => this.state.data.exists(steamId))
+      ? this.state.teamTwo.filter(profileId =>
+          this.state.data.exists(profileId)
+        )
       : [];
 
     // Update 1v1 random map
@@ -593,14 +597,14 @@ export async function getStaticProps(context) {
     );
 
     // Format the data
-    let aoeData = {}; // {"steamId: [name, randomMapRating, teamRandomMapRating]"}
+    let aoeData = {}; // {"profileId: [name, randomMapRating, teamRandomMapRating]"}
     let xmax = 0;
     let xmin = Number.MAX_VALUE;
     for (let i = 0; i < randomMapLeaderboard.length; i++) {
       let name = randomMapLeaderboard[i].name;
-      let steamId = randomMapLeaderboard[i].steam_id;
+      let profileId = randomMapLeaderboard[i].profile_id;
       let soloRating = randomMapLeaderboard[i].rating;
-      aoeData[steamId] = [name, soloRating, null];
+      aoeData[profileId] = [name, soloRating, null];
 
       // Update min and max
       if (soloRating < xmin) {
@@ -618,12 +622,12 @@ export async function getStaticProps(context) {
 
     for (let i = 0; i < teamRandomMapLeaderbaord.length; i++) {
       let name = teamRandomMapLeaderbaord[i].name;
-      let steamId = teamRandomMapLeaderbaord[i].steam_id;
+      let profileId = teamRandomMapLeaderbaord[i].profile_id;
       let teamRating = teamRandomMapLeaderbaord[i].rating;
-      if (aoeData[steamId] == undefined) {
-        aoeData[steamId] = [name, null, teamRating];
+      if (aoeData[profileId] == undefined) {
+        aoeData[profileId] = [name, null, teamRating];
       } else {
-        aoeData[steamId][2] = teamRating;
+        aoeData[profileId][2] = teamRating;
       }
       // Update min and max
       if (teamRating < xmin) {
@@ -648,6 +652,8 @@ export async function getStaticProps(context) {
     console.log("Doing nextjs stuff...");
 
     // the return value will be passed to the page component as props
+    console.log(allData);
+
     return {
       props: {
         // Nextjs is inexplicably slow if 'allData' is passed as an array so we'll serialize it ourselves

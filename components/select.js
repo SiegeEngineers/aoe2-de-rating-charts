@@ -10,15 +10,15 @@ class Select extends React.Component {
       this.props.dataSet &&
       prevProps.value != this.props.value
     ) {
-      let values = this.props.value.filter(steamId =>
-        this.props.dataSet.exists(steamId)
+      let values = this.props.value.filter(profileId =>
+        this.props.dataSet.exists(profileId)
       );
       let newSelectionState = [];
       for (let i = 0; i < values.length; i++) {
-        let steamId = values[i];
+        let profileId = values[i];
         newSelectionState.push({
-          label: this.props.dataSet.getName(steamId),
-          value: steamId
+          label: this.props.dataSet.getName(profileId),
+          value: profileId
         });
       }
       this.setState({ selection: newSelectionState });

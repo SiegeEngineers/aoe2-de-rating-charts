@@ -4,11 +4,11 @@ import styles from "./team-table.module.css";
 class TeamTable extends React.Component {
   state = {};
 
-  calculateAverage(data, acessorFunction, steamIds) {
+  calculateAverage(data, acessorFunction, profileIds) {
     let count = 0;
     let sum = 0;
-    for (let i = 0; i < steamIds.length; i++) {
-      let result = acessorFunction.call(data, steamIds[i]);
+    for (let i = 0; i < profileIds.length; i++) {
+      let result = acessorFunction.call(data, profileIds[i]);
       if (result) {
         sum += result;
         count++;
@@ -30,7 +30,9 @@ class TeamTable extends React.Component {
 
   render() {
     const data = this.props.data;
-    const players = this.props.players.filter(steamId => data.exists(steamId));
+    const players = this.props.players.filter(profileId =>
+      data.exists(profileId)
+    );
     const color = this.props.color;
     const teamLabel = this.props.teamLabel;
 
@@ -42,14 +44,14 @@ class TeamTable extends React.Component {
     const items = [];
 
     for (let i = 0; i < players.length; i++) {
-      let steamId = players[i];
-      let name = data.getName(steamId);
-      let randomMapRating = data.getSoloRating(steamId);
-      let randomMapPercentile = data.getSoloPercentile(steamId);
-      let teamRandomMapRating = data.getTeamRating(steamId);
-      let teamRandomMapPercentile = data.getTeamPercentile(steamId);
-      let euclideanRating = data.getComboRating(steamId);
-      let euclideanPercentile = data.getComboPercentile(steamId);
+      let profileId = players[i];
+      let name = data.getName(profileId);
+      let randomMapRating = data.getSoloRating(profileId);
+      let randomMapPercentile = data.getSoloPercentile(profileId);
+      let teamRandomMapRating = data.getTeamRating(profileId);
+      let teamRandomMapPercentile = data.getTeamPercentile(profileId);
+      let euclideanRating = data.getComboRating(profileId);
+      let euclideanPercentile = data.getComboPercentile(profileId);
       items.push(
         <tr>
           <th width="28%">{name}</th>
@@ -104,34 +106,34 @@ class TeamTable extends React.Component {
 
       items.push(
         <tr style={{ borderTop: "1px solid " + color }}>
-          <th class={styles.teamAvgRow}>
+          <th className={styles.teamAvgRow}>
             <b>{teamLabel} Avg</b>
           </th>
           <th
-            class={styles.teamAvgRow}
+            className={styles.teamAvgRow}
             style={{ borderLeft: "1px solid " + color }}
           >
             <b>{this.formatAverage(soloRatingAvg)}</b>
           </th>
-          <th class={styles.teamAvgRow}>
+          <th className={styles.teamAvgRow}>
             <b>{data.formatPercentage(soloPercentageAvg)}</b>
           </th>
           <th
-            class={styles.teamAvgRow}
+            className={styles.teamAvgRow}
             style={{ borderLeft: "1px solid " + color }}
           >
             <b>{this.formatAverage(teamRatingAvg)}</b>
           </th>
-          <th class={styles.teamAvgRow}>
+          <th className={styles.teamAvgRow}>
             <b>{data.formatPercentage(teamPercentageAvg)}</b>
           </th>
           <th
-            class={styles.teamAvgRow}
+            className={styles.teamAvgRow}
             style={{ borderLeft: "1px solid " + color }}
           >
             <b>{this.formatAverage(comboRankingAvg)}</b>
           </th>
-          <th class={styles.teamAvgRow}>
+          <th className={styles.teamAvgRow}>
             <b>{data.formatPercentage(comboPercentageAvg)}</b>
           </th>
         </tr>
