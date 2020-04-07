@@ -3,7 +3,7 @@ const debug = process.env.NODE_ENV !== "production";
 module.exports = {
   exportPathMap: function() {
     return {
-      "/": { page: "/" }
+      "/": { page: "/", query: ["team_one", "team_two"] }
     };
   },
   assetPrefix: !debug ? "/aoe2-de-rating-charts" : "",

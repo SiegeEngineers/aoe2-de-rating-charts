@@ -13,8 +13,8 @@ const COMBO_RANK = 6;
 
 class Data {
   constructor(rawData) {
-    // Indexes in the raw data are fifferent than the ones on the processed data
-    const RAW_STEAM_ID = 0;
+    // Indexes in the raw data are different than the ones on the processed data
+    const RAW_PROFILE_ID = 0;
     const RAW_NAME = 1;
     const RAW_SOLO_RATING = 2;
     const RAW_TEAM_RATING = 3;
@@ -29,8 +29,24 @@ class Data {
     this.totalTeamPlayers = 0;
     this.totalBothPlayers = 0;
 
-    // Assumes rawData is in decending order by soloRating
+    // Sort decending order by soloRating so we can determine rankings and a few other metrics
+    arrayData.sort(function(a, b) {
+      if (a[RAW_SOLO_RATING] === b[RAW_SOLO_RATING]) {
+        return 0;
+      } else if (!a[RAW_SOLO_RATING]) {
+        return 1;
+      } else if (!b[RAW_SOLO_RATING]) {
+        return -1;
+      }
+      return a[RAW_SOLO_RATING] < b[RAW_SOLO_RATING] ? 1 : -1;
+    });
+
     for (let i = 0; i < arrayData.length; i++) {
+      console.log(
+        arrayData[i][RAW_PROFILE_ID],
+        arrayData[i][RAW_SOLO_RATING],
+        arrayData[i][RAW_NAME]
+      );
       const soloRating = arrayData[i][RAW_SOLO_RATING];
       const teamRating = arrayData[i][RAW_TEAM_RATING];
 
@@ -105,37 +121,37 @@ class Data {
     // Format the data as an object internally for quick lookup
     this.data = {};
     for (let i = 0; i < arrayData.length; i++) {
-      const steamId = arrayData[i][RAW_STEAM_ID];
-      this.data[steamId] = arrayData[i].slice(1, arrayData[i].length);
+      const profileId = arrayData[i][RAW_PROFILE_ID];
+      this.data[profileId] = arrayData[i].slice(1, arrayData[i].length);
     }
 
-    let steamIds = Object.keys(this.data);
+    let profileIds = Object.keys(this.data);
 
     // Precalculate solo data
     this.soloData = [];
-    for (let i = 0; i < steamIds.length; i++) {
-      this.soloData.push(this.getSoloRating(steamIds[i]));
+    for (let i = 0; i < profileIds.length; i++) {
+      this.soloData.push(this.getSoloRating(profileIds[i]));
     }
 
     // Precalculate team data
     this.teamData = [];
-    for (let i = 0; i < steamIds.length; i++) {
-      this.teamData.push(this.getTeamRating(steamIds[i]));
+    for (let i = 0; i < profileIds.length; i++) {
+      this.teamData.push(this.getTeamRating(profileIds[i]));
     }
 
     // Precalculate names
     this.names = [];
-    for (let i = 0; i < steamIds.length; i++) {
-      this.names.push(this.getName(steamIds[i]));
+    for (let i = 0; i < profileIds.length; i++) {
+      this.names.push(this.getName(profileIds[i]));
     }
 
     // Precalculate Select data
     this.selectData = [];
-    for (let i = 0; i < steamIds.length; i++) {
-      let steamId = steamIds[i];
+    for (let i = 0; i < profileIds.length; i++) {
+      let profileId = profileIds[i];
       this.selectData.push({
-        value: steamId,
-        label: this.data[steamId][NAME]
+        value: profileId,
+        label: this.data[profileId][NAME]
       });
     }
   }
@@ -156,56 +172,56 @@ class Data {
     return this.names;
   }
 
-  exists(steamId) {
-    return Boolean(this.data[steamId]);
+  exists(profileId) {
+    return Boolean(this.data[profileId]);
   }
 
-  getName(steamId) {
-    return this.data[steamId][NAME];
+  getName(profileId) {
+    return this.data[profileId][NAME];
   }
 
-  getSoloRating(steamId) {
-    return this.data[steamId][SOLO_RATING];
+  getSoloRating(profileId) {
+    return this.data[profileId][SOLO_RATING];
   }
 
-  getSoloRank(steamId) {
-    return this.data[steamId][SOLO_RANK];
+  getSoloRank(profileId) {
+    return this.data[profileId][SOLO_RANK];
   }
 
-  getSoloPercentile(steamId) {
-    let soloRank = this.getSoloRank(steamId);
+  getSoloPercentile(profileId) {
+    let soloRank = this.getSoloRank(profileId);
     if (!soloRank) {
       return null;
     }
     return (this.totalSoloPlayers - (soloRank - 1)) / this.totalSoloPlayers;
   }
 
-  getTeamRank(steamId) {
-    return this.data[steamId][TEAM_RANK];
+  getTeamRank(profileId) {
+    return this.data[profileId][TEAM_RANK];
   }
 
-  getTeamRating(steamId) {
-    return this.data[steamId][TEAM_RATING];
+  getTeamRating(profileId) {
+    return this.data[profileId][TEAM_RATING];
   }
 
-  getTeamPercentile(steamId) {
-    let teamRank = this.getTeamRank(steamId);
+  getTeamPercentile(profileId) {
+    let teamRank = this.getTeamRank(profileId);
     if (!teamRank) {
       return null;
     }
     return (this.totalTeamPlayers - (teamRank - 1)) / this.totalTeamPlayers;
   }
 
-  getComboRating(steamId) {
-    return this.data[steamId][COMBO_RATING];
+  getComboRating(profileId) {
+    return this.data[profileId][COMBO_RATING];
   }
 
-  getComboRank(steamId) {
-    return this.data[steamId][COMBO_RANK];
+  getComboRank(profileId) {
+    return this.data[profileId][COMBO_RANK];
   }
 
-  getComboPercentile(steamId) {
-    let comboRank = this.getComboRank(steamId);
+  getComboPercentile(profileId) {
+    let comboRank = this.getComboRank(profileId);
     if (!comboRank) {
       return comboRank;
     }
