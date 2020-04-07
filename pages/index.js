@@ -436,7 +436,7 @@ export default class extends Component {
               }}
             >
               <img
-                src={"/" + process.env.BACKEND_URL + "/puff.svg"}
+                src="puff.svg"
                 alt="Loading..."
                 style={{
                   backgroundColor: "black",
