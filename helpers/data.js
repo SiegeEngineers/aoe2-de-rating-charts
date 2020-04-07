@@ -42,11 +42,6 @@ class Data {
     });
 
     for (let i = 0; i < arrayData.length; i++) {
-      console.log(
-        arrayData[i][RAW_PROFILE_ID],
-        arrayData[i][RAW_SOLO_RATING],
-        arrayData[i][RAW_NAME]
-      );
       const soloRating = arrayData[i][RAW_SOLO_RATING];
       const teamRating = arrayData[i][RAW_TEAM_RATING];
 
