@@ -9,7 +9,6 @@ import styles from "./index.module.css";
 const got = require("got");
 const fs = require("fs");
 
-// Set this to true for development. You won't get all the data, but it will build MUCH faster after the API calls are cached.
 const DEFAULT_COLOR = "#0eac22"; // green
 const TEAM_ONE_COLOR = "#6311a5"; // purple
 const TEAM_TWO_COLOR = "#fe9918"; // orange
@@ -19,6 +18,12 @@ const AXIS_FONT_SIZE = 14;
 const AXIS_FONT_COLOR = "#7f7f7f";
 const TITLE_FONT_SIZE = 18;
 const FONT = "Roboto, Arial, sans-serif";
+const MARGINS = {
+  l: 50,
+  r: 15,
+  t: 50,
+  b: 40
+};
 
 /*
 TODO:
@@ -63,12 +68,7 @@ export default class extends Component {
         xanchor: "center",
         yanchor: "bottom"
       },
-      margin: {
-        l: 50,
-        r: 15,
-        t: 50,
-        b: 40
-      },
+      margin: MARGINS,
       xaxis: {
         title: {
           text: "Rating",
@@ -125,12 +125,7 @@ export default class extends Component {
         xanchor: "center",
         yanchor: "bottom"
       },
-      margin: {
-        l: 50,
-        r: 15,
-        t: 50,
-        b: 40
-      },
+      margin: MARGINS,
       xaxis: {
         title: {
           text: "Rating",
@@ -196,12 +191,7 @@ export default class extends Component {
         xanchor: "center",
         yanchor: "bottom"
       },
-      margin: {
-        l: 50,
-        r: 15,
-        t: 50,
-        b: 40
-      },
+      margin: MARGINS,
       xaxis: {
         title: {
           text: "1v1 Rating",
@@ -254,6 +244,32 @@ export default class extends Component {
         this.randomMapDiv = values[0];
         this.teamRandomMapDiv = values[1];
         this.scatterplotDiv = values[2];
+
+        // Adding these event make it possible to scroll the page whenever touching a plotly chart.
+        // Without them there appears to be some plotly event's that prevent the scroll action.
+        this.randomMapDiv.addEventListener(
+          "touchstart",
+          function(event) {
+            event.stopPropagation();
+          },
+          true
+        );
+
+        this.teamRandomMapDiv.addEventListener(
+          "touchstart",
+          function(event) {
+            event.stopPropagation();
+          },
+          true
+        );
+
+        this.scatterplotDiv.addEventListener(
+          "touchstart",
+          function(event) {
+            event.stopPropagation();
+          },
+          true
+        );
 
         let queryString = window.location.search;
         let parsed = parseQueryString(queryString);
@@ -343,7 +359,7 @@ export default class extends Component {
         <div>
           <div>
             <table
-              class="tg"
+              className="tg"
               style={{
                 fontSize: "12px",
                 width: "100%",
@@ -406,6 +422,9 @@ export default class extends Component {
         </head>
         <body style={{ fontFamily: FONT }}>
           <div className={styles.center}>
+            <div style={{ display: "none" }}>
+              PROCESS '{process.env.BACKEND_URL}'
+            </div>
             <div
               id="loading"
               style={{
@@ -417,7 +436,7 @@ export default class extends Component {
               }}
             >
               <img
-                src={"/puff.svg"}
+                src={"/" + process.env.BACKEND_URL + "/puff.svg"}
                 alt="Loading..."
                 style={{
                   backgroundColor: "black",
@@ -519,9 +538,9 @@ export default class extends Component {
                 </div>
               </div>
             </div>
-            <hr class={styles.divider}></hr>
+            <hr className={styles.divider}></hr>
             <div id="table">{table}</div>
-            <hr class={styles.divider}></hr>
+            <hr className={styles.divider}></hr>
             <div id="random_map_histogram"></div>
             <div id="team_random_map_histogram"></div>
             <div id="combo_scatterplot"></div>
