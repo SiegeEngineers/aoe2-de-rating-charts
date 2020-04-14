@@ -2,7 +2,7 @@
  * Best effort algorithm for preventing plotly annotations from overlaping
  */
 
-Number.prototype.clamp = function(min, max) {
+Number.prototype.clamp = function (min, max) {
   return Math.min(Math.max(this, min), max);
 };
 
@@ -149,7 +149,7 @@ class AnnotationSeparator {
 
     return {
       x: active.x,
-      y: active.y
+      y: active.y,
     };
   }
 
@@ -192,7 +192,7 @@ class AnnotationSeparator {
         { x: active.x + 1, y: active.y },
         { x: active.x - 1, y: active.y },
         { x: active.x, y: active.y + 1 },
-        { x: active.x, y: active.y - 1 }
+        { x: active.x, y: active.y - 1 },
       ];
 
       for (let i = 0; i < toAdd.length; i++) {
@@ -215,6 +215,20 @@ class AnnotationSeparator {
     }
   }
 
+  // returns true iff the line from (a,b)->(c,d) intersects with (p,q)->(r,s)
+  //https://stackoverflow.com/questions/9043805/test-if-two-lines-intersect-javascript-function
+  doLineSegmentsIntersect(a, b, c, d, p, q, r, s) {
+    var det, gamma, lambda;
+    det = (c - a) * (s - q) - (r - p) * (d - b);
+    if (det === 0) {
+      return false;
+    } else {
+      lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+      gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+      return 0 < lambda && lambda < 1 && 0 < gamma && gamma < 1;
+    }
+  }
+
   doesPointIntersectRectable(point, rectangle) {
     let pointX = point.x;
     let pointY = point.y;
@@ -233,13 +247,13 @@ class AnnotationSeparator {
       let annotation = this.inputAnnotations[i];
 
       // Get the closest annotation slot to the data point
-      let newXindex = this.getClosestPartitionIndex(
+      let closestXindex = this.getClosestPartitionIndex(
         annotation.ax,
         this.minX,
         this.maxX,
         this.numberOfXPartitions
       );
-      let newYindex = this.getClosestPartitionIndex(
+      let closestYindex = this.getClosestPartitionIndex(
         annotation.ay,
         this.minY,
         this.maxY,
@@ -247,30 +261,65 @@ class AnnotationSeparator {
       );
 
       let adjusted = this.calculateAndReserveNearestValidPartitionIndex(
-        newXindex,
-        newYindex,
+        closestXindex,
+        closestYindex,
         annotation,
         this.inputAnnotations
       );
-      // Null means we were unable to find a satisfctory place for the annotation, just leave it wherever
+
+      // Null means we were unable to find a satisfactory place for the annotation, just leave it wherever
       if (adjusted !== null) {
-        newXindex = adjusted.x;
-        newYindex = adjusted.y;
+        closestXindex = adjusted.x;
+        closestYindex = adjusted.y;
 
         // Translate indexes to coordinates
         let newX = this.getCoordinatesFromPartitionIndex(
-          newXindex,
+          closestXindex,
           this.minX,
           this.annotationWidth
         );
         let newY = this.getCoordinatesFromPartitionIndex(
-          newYindex,
+          closestYindex,
           this.minY,
           this.annotationHeight
         );
 
         annotation.ax = newX;
         annotation.ay = newY;
+      }
+    }
+
+    // Loop over and swap the positions of any crossing annotations
+    for (let i = 0; i < this.inputAnnotations.length; i++) {
+      let annotationI = this.inputAnnotations[i];
+      for (let j = i; j < this.inputAnnotations.length; j++) {
+        let annotationJ = this.inputAnnotations[j];
+
+        if (annotationI === annotationJ) {
+          continue;
+        }
+
+        let intersects = this.doLineSegmentsIntersect(
+          annotationI.x,
+          annotationI.y,
+          annotationI.ax,
+          annotationI.ay,
+          annotationJ.x,
+          annotationJ.y,
+          annotationJ.ax,
+          annotationJ.ay
+        );
+        if (intersects) {
+          // Annotation arrows intersect! Swap the annotation locations.
+          console.log("Intersection!", annotationI.text, annotationJ.text);
+
+          let tempX = annotationI.ax;
+          let tempY = annotationI.ay;
+          annotationI.ax = annotationJ.ax;
+          annotationI.ay = annotationJ.ay;
+          annotationJ.ax = tempX;
+          annotationJ.ay = tempY;
+        }
       }
     }
 
