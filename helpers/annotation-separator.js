@@ -311,8 +311,6 @@ class AnnotationSeparator {
         );
         if (intersects) {
           // Annotation arrows intersect! Swap the annotation locations.
-          console.log("Intersection!", annotationI.text, annotationJ.text);
-
           let tempX = annotationI.ax;
           let tempY = annotationI.ay;
           annotationI.ax = annotationJ.ax;
