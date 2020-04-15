@@ -22,7 +22,7 @@ const MARGINS = {
   l: 50,
   r: 15,
   t: 50,
-  b: 40
+  b: 40,
 };
 
 /*
@@ -38,7 +38,7 @@ export default class extends Component {
   state = {
     data: null,
     teamOne: [],
-    teamTwo: []
+    teamTwo: [],
   };
 
   componentDidMount() {
@@ -54,19 +54,19 @@ export default class extends Component {
       x: dataSet.getAllSoloRatings(),
       type: "histogram",
       marker: {
-        color: DEFAULT_COLOR
+        color: DEFAULT_COLOR,
       },
-      hovertemplate: "# of Players: %{y}<extra></extra>"
+      hovertemplate: "# of Players: %{y}<extra></extra>",
     };
     var layout = {
       title: {
         text: "1v1 Random Map",
         font: {
           family: FONT,
-          size: TITLE_FONT_SIZE
+          size: TITLE_FONT_SIZE,
         },
         xanchor: "center",
-        yanchor: "bottom"
+        yanchor: "bottom",
       },
       margin: MARGINS,
       xaxis: {
@@ -75,11 +75,11 @@ export default class extends Component {
           font: {
             family: FONT,
             size: AXIS_FONT_SIZE,
-            color: AXIS_FONT_COLOR
-          }
+            color: AXIS_FONT_COLOR,
+          },
         },
         range: [xmin, xmax],
-        fixedrange: true
+        fixedrange: true,
       },
       yaxis: {
         title: {
@@ -87,19 +87,19 @@ export default class extends Component {
           font: {
             family: FONT,
             size: AXIS_FONT_SIZE,
-            color: AXIS_FONT_COLOR
-          }
+            color: AXIS_FONT_COLOR,
+          },
         },
-        fixedrange: true
+        fixedrange: true,
       },
-      marker: { color: DEFAULT_COLOR }
+      marker: { color: DEFAULT_COLOR },
     };
     var data = [trace];
     let randomMapPlot = Plotly.newPlot("random_map_histogram", data, layout, {
       scrollZoom: false,
       responsive: true,
       showLink: true,
-      plotlyServerURL: "https://chart-studio.plotly.com"
+      plotlyServerURL: "https://chart-studio.plotly.com",
     });
 
     // Team Random Map Histogram
@@ -111,19 +111,19 @@ export default class extends Component {
       x: dataSet.getAllTeamRatings(),
       type: "histogram",
       marker: {
-        color: DEFAULT_COLOR
+        color: DEFAULT_COLOR,
       },
-      hovertemplate: "# of Players: %{y}<extra></extra>"
+      hovertemplate: "# of Players: %{y}<extra></extra>",
     };
     var layout = {
       title: {
         text: "Team Random Map",
         font: {
           family: FONT,
-          size: TITLE_FONT_SIZE
+          size: TITLE_FONT_SIZE,
         },
         xanchor: "center",
-        yanchor: "bottom"
+        yanchor: "bottom",
       },
       margin: MARGINS,
       xaxis: {
@@ -132,11 +132,11 @@ export default class extends Component {
           font: {
             family: FONT,
             size: AXIS_FONT_SIZE,
-            color: AXIS_FONT_COLOR
-          }
+            color: AXIS_FONT_COLOR,
+          },
         },
         range: [xmin, xmax],
-        fixedrange: true
+        fixedrange: true,
       },
       yaxis: {
         title: {
@@ -144,11 +144,11 @@ export default class extends Component {
           font: {
             family: FONT,
             size: AXIS_FONT_SIZE,
-            color: AXIS_FONT_COLOR
-          }
+            color: AXIS_FONT_COLOR,
+          },
         },
-        fixedrange: true
-      }
+        fixedrange: true,
+      },
     };
     var data = [trace];
     let teamRandomMapPlot = Plotly.newPlot(
@@ -159,7 +159,7 @@ export default class extends Component {
         scrollZoom: false,
         responsive: true,
         showLink: true,
-        plotlyServerURL: "https://chart-studio.plotly.com"
+        plotlyServerURL: "https://chart-studio.plotly.com",
       }
     );
 
@@ -172,10 +172,10 @@ export default class extends Component {
       type: "scattergl",
       textposition: "top center",
       textfont: {
-        family: FONT
+        family: FONT,
       },
       marker: { size: 2, color: DEFAULT_COLOR },
-      hovertemplate: "Name: %{text}<br>Team: %{y}<br>1v1: %{x}<extra></extra>"
+      hovertemplate: "Name: %{text}<br>Team: %{y}<br>1v1: %{x}<extra></extra>",
     };
 
     var data = [trace1];
@@ -186,10 +186,10 @@ export default class extends Component {
         text: "1v1 Random Map vs<br>Team Random Map",
         font: {
           family: FONT,
-          size: TITLE_FONT_SIZE
+          size: TITLE_FONT_SIZE,
         },
         xanchor: "center",
-        yanchor: "bottom"
+        yanchor: "bottom",
       },
       margin: MARGINS,
       xaxis: {
@@ -198,11 +198,11 @@ export default class extends Component {
           font: {
             family: FONT,
             size: AXIS_FONT_SIZE,
-            color: AXIS_FONT_COLOR
-          }
+            color: AXIS_FONT_COLOR,
+          },
         },
         range: [xmin, xmax],
-        fixedrange: true
+        fixedrange: true,
       },
       yaxis: {
         title: {
@@ -210,18 +210,18 @@ export default class extends Component {
           font: {
             family: FONT,
             size: AXIS_FONT_SIZE,
-            color: AXIS_FONT_COLOR
-          }
+            color: AXIS_FONT_COLOR,
+          },
         },
-        fixedrange: true
-      }
+        fixedrange: true,
+      },
     };
 
     let scatterPlot = Plotly.newPlot("combo_scatterplot", data, layout, {
       scrollZoom: false,
       responsive: true,
       showLink: true,
-      plotlyServerURL: "https://chart-studio.plotly.com"
+      plotlyServerURL: "https://chart-studio.plotly.com",
     });
 
     let lastUpdatedDiv = document.getElementById("last_updated");
@@ -237,7 +237,7 @@ export default class extends Component {
 
     // Remove the loading div
     Promise.all([randomMapPlot, teamRandomMapPlot, scatterPlot]).then(
-      function(values) {
+      function (values) {
         let loadingDiv = document.getElementById("loading");
         loadingDiv.style.display = "none";
 
@@ -249,7 +249,7 @@ export default class extends Component {
         // Without them there appears to be some plotly event's that prevent the scroll action.
         this.randomMapDiv.addEventListener(
           "touchstart",
-          function(event) {
+          function (event) {
             event.stopPropagation();
           },
           true
@@ -257,7 +257,7 @@ export default class extends Component {
 
         this.teamRandomMapDiv.addEventListener(
           "touchstart",
-          function(event) {
+          function (event) {
             event.stopPropagation();
           },
           true
@@ -265,7 +265,7 @@ export default class extends Component {
 
         this.scatterplotDiv.addEventListener(
           "touchstart",
-          function(event) {
+          function (event) {
             event.stopPropagation();
           },
           true
@@ -276,7 +276,7 @@ export default class extends Component {
         this.setState({
           data: dataSet,
           teamOne: parsed.team_one ? parsed.team_one.split("-") : [],
-          teamTwo: parsed.team_two ? parsed.team_two.split("-") : []
+          teamTwo: parsed.team_two ? parsed.team_two.split("-") : [],
         });
       }.bind(this)
     );
@@ -289,12 +289,12 @@ export default class extends Component {
     }
 
     let teamOneSelection = this.state.teamOne
-      ? this.state.teamOne.filter(profileId =>
+      ? this.state.teamOne.filter((profileId) =>
           this.state.data.exists(profileId)
         )
       : [];
     let teamTwoSelection = this.state.teamTwo
-      ? this.state.teamTwo.filter(profileId =>
+      ? this.state.teamTwo.filter((profileId) =>
           this.state.data.exists(profileId)
         )
       : [];
@@ -305,14 +305,14 @@ export default class extends Component {
       soloRandomMapColorInfo.push({
         color: TEAM_ONE_COLOR,
         value: this.state.data.getSoloRating(teamOneSelection[i]),
-        name: this.state.data.getName(teamOneSelection[i])
+        name: this.state.data.getName(teamOneSelection[i]),
       });
     }
     for (let i = 0; i < teamTwoSelection.length; i++) {
       soloRandomMapColorInfo.push({
         color: TEAM_TWO_COLOR,
         value: this.state.data.getSoloRating(teamTwoSelection[i]),
-        name: this.state.data.getName(teamTwoSelection[i])
+        name: this.state.data.getName(teamTwoSelection[i]),
       });
     }
     highlightHistogramMarker(this.randomMapDiv, soloRandomMapColorInfo);
@@ -323,14 +323,14 @@ export default class extends Component {
       teamRandomMapColorInfo.push({
         color: TEAM_ONE_COLOR,
         value: this.state.data.getTeamRating(teamOneSelection[i]),
-        name: this.state.data.getName(teamOneSelection[i])
+        name: this.state.data.getName(teamOneSelection[i]),
       });
     }
     for (let i = 0; i < teamTwoSelection.length; i++) {
       teamRandomMapColorInfo.push({
         color: TEAM_TWO_COLOR,
         value: this.state.data.getTeamRating(teamTwoSelection[i]),
-        name: this.state.data.getName(teamTwoSelection[i])
+        name: this.state.data.getName(teamTwoSelection[i]),
       });
     }
     highlightHistogramMarker(this.teamRandomMapDiv, teamRandomMapColorInfo);
@@ -342,7 +342,7 @@ export default class extends Component {
         color: TEAM_ONE_COLOR,
         valueX: this.state.data.getSoloRating(teamOneSelection[i]),
         valueY: this.state.data.getTeamRating(teamOneSelection[i]),
-        name: this.state.data.getName(teamOneSelection[i])
+        name: this.state.data.getName(teamOneSelection[i]),
       });
     }
     for (let i = 0; i < teamTwoSelection.length; i++) {
@@ -350,7 +350,7 @@ export default class extends Component {
         color: TEAM_TWO_COLOR,
         valueX: this.state.data.getSoloRating(teamTwoSelection[i]),
         valueY: this.state.data.getTeamRating(teamTwoSelection[i]),
-        name: this.state.data.getName(teamTwoSelection[i])
+        name: this.state.data.getName(teamTwoSelection[i]),
       });
     }
     highlightScatterplotMarker(this.scatterplotDiv, scatterPlotColorInfo);
@@ -370,7 +370,7 @@ export default class extends Component {
                 tableLayout: "fixed",
                 overflow: "hidden",
                 textAlign: "center",
-                borderCollapse: "collapse"
+                borderCollapse: "collapse",
               }}
             >
               <tr>
@@ -424,6 +424,11 @@ export default class extends Component {
             type="text/javascript"
             src="https://cdn.plot.ly/plotly-latest.min.js"
           ></script>
+          <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=UA-163727547-1"
+          ></script>
+          <script src="ga.js"></script>
         </head>
         <body style={{ fontFamily: FONT }}>
           <div className={styles.center}>
@@ -437,7 +442,7 @@ export default class extends Component {
                 display: "flex",
                 zIndex: 1,
                 padding: "10px",
-                borderRadius: "25px"
+                borderRadius: "25px",
               }}
             >
               <img
@@ -447,7 +452,7 @@ export default class extends Component {
                   backgroundColor: "black",
                   width: "100px",
                   height: "100px",
-                  padding: "10px"
+                  padding: "10px",
                 }}
               ></img>
               <div
@@ -463,7 +468,7 @@ export default class extends Component {
                 style={{
                   paddingBottom: "16px",
                   marginTop: "-16px",
-                  fontSize: "9pt"
+                  fontSize: "9pt",
                 }}
               >
                 <i>Updated daily†</i>
@@ -476,7 +481,7 @@ export default class extends Component {
                   style={{
                     border: TEAM_ONE_COLOR,
                     borderStyle: "solid",
-                    borderRadius: "7px"
+                    borderRadius: "7px",
                   }}
                 >
                   <Select
@@ -484,10 +489,10 @@ export default class extends Component {
                     dataSet={this.state.data}
                     blacklist={this.state.teamTwo}
                     value={this.state.teamOne}
-                    onSelection={function(selection) {
+                    onSelection={function (selection) {
                       // This setTimeout seems to help responsiveness
                       setTimeout(
-                        function() {
+                        function () {
                           this.setState({ teamOne: selection });
                         }.bind(this),
                         1
@@ -512,7 +517,7 @@ export default class extends Component {
                   style={{
                     border: TEAM_TWO_COLOR,
                     borderStyle: "solid",
-                    borderRadius: "7px"
+                    borderRadius: "7px",
                   }}
                 >
                   <Select
@@ -520,10 +525,10 @@ export default class extends Component {
                     dataSet={this.state.data}
                     blacklist={this.state.teamOne}
                     value={this.state.teamTwo}
-                    onSelection={function(selection) {
+                    onSelection={function (selection) {
                       // This setTimeout seems to help responsiveness
                       setTimeout(
-                        function() {
+                        function () {
                           this.setState({ teamTwo: selection });
                         }.bind(this),
                         1
@@ -660,14 +665,14 @@ export async function getStaticProps(context) {
         data: JSON.stringify(allData),
         timestamp: updatedTime,
         xmin: xmin,
-        xmax: xmax
-      }
+        xmax: xmax,
+      },
     };
   } catch (error) {
     console.log("ERROR" + error);
     console.log(error);
     return {
-      props: {}
+      props: {},
     };
   }
 }
@@ -683,77 +688,88 @@ async function getLeaderboardData(leaderboardId) {
     CACHE_EXPIRATION_IN_HOURS,
     "hours..."
   );
-  if (
-    fs.existsSync(CACHE_FILE_PATH) &&
-    Date.now() - fs.statSync(CACHE_FILE_PATH).mtimeMs <
-      CACHE_EXPIRATION_IN_HOURS * 60 * 60 * 1000
-  ) {
-    console.log(
-      `Using cache file to avoid API calls to aoe2.net for leaderboard ${leaderboardId}...`
-    );
-    leaderboard = JSON.parse(fs.readFileSync(CACHE_FILE_PATH, "utf8"));
-    updatedTime = fs.statSync(CACHE_FILE_PATH).mtimeMs;
-  } else {
-    console.log(
-      `Fetching data from aoe2.net for leaderboard ${leaderboardId}...`
-    );
-    let firstResponse = await got(
-      `https://aoe2.net/api/leaderboard?game=aoe2de&leaderboard_id=${leaderboardId}&start=1&count=1`
-    ).json();
-    let numberOfRankedPlayers = firstResponse.total;
 
-    let numberOfRequests = Math.ceil(
-      numberOfRankedPlayers / API_CALL_CHUNK_SIZE
-    );
-
-    console.log(
-      "It will require",
-      numberOfRequests,
-      "API requests to retrieve",
-      numberOfRankedPlayers,
-      "players"
-    );
-
-    // The max number of leaderboard entries we can request is 1000, so we'll do it in chunks
-    for (let i = 0; i < numberOfRequests; i++) {
-      let startIndex = i * API_CALL_CHUNK_SIZE;
+  try {
+    if (
+      fs.existsSync(CACHE_FILE_PATH) &&
+      Date.now() - fs.statSync(CACHE_FILE_PATH).mtimeMs <
+        CACHE_EXPIRATION_IN_HOURS * 60 * 60 * 1000
+    ) {
       console.log(
-        "Requesting",
-        startIndex,
-        "to",
-        startIndex + API_CALL_CHUNK_SIZE
+        `Using cache file to avoid API calls to aoe2.net for leaderboard ${leaderboardId}...`
+      );
+      leaderboard = JSON.parse(fs.readFileSync(CACHE_FILE_PATH, "utf8"));
+      updatedTime = fs.statSync(CACHE_FILE_PATH).mtimeMs;
+    } else {
+      console.log(
+        `Fetching data from aoe2.net for leaderboard ${leaderboardId}...`
+      );
+      let firstResponse = await got(
+        `https://aoe2.net/api/leaderboard?game=aoe2de&leaderboard_id=${leaderboardId}&start=1&count=1`
+      ).json();
+      let numberOfRankedPlayers = firstResponse.total;
+
+      let numberOfRequests = Math.ceil(
+        numberOfRankedPlayers / API_CALL_CHUNK_SIZE
       );
 
-      let dataResponse = await got(
-        `https://aoe2.net/api/leaderboard?game=aoe2de&leaderboard_id=${leaderboardId}&start=${startIndex}&count=${API_CALL_CHUNK_SIZE}`
-      ).json();
-      leaderboard = leaderboard.concat(dataResponse.leaderboard);
+      console.log(
+        "It will require",
+        numberOfRequests,
+        "API requests to retrieve",
+        numberOfRankedPlayers,
+        "players"
+      );
 
-      // Wait a litte bit between each api call. There are currently no API limits but still want to respect the server.
-      console.log("WAITING...");
-      await new Promise(r => setTimeout(r, API_CALL_DELAY_IN_MS));
-    }
+      // The max number of leaderboard entries we can request is 1000, so we'll do it in chunks
+      for (let i = 0; i < numberOfRequests; i++) {
+        let startIndex = i * API_CALL_CHUNK_SIZE;
+        console.log(
+          "Requesting",
+          startIndex,
+          "to",
+          startIndex + API_CALL_CHUNK_SIZE
+        );
 
-    console.log("Total rows fetched", leaderboard.length);
+        let dataResponse = await got(
+          `https://aoe2.net/api/leaderboard?game=aoe2de&leaderboard_id=${leaderboardId}&start=${startIndex}&count=${API_CALL_CHUNK_SIZE}`
+        ).json();
+        leaderboard = leaderboard.concat(dataResponse.leaderboard);
 
-    // Write the result to the file system cache so we don't have to make the api call each time we build
-    if (!fs.existsSync(CACHE_DIRECTORY)) {
-      fs.mkdirSync(CACHE_DIRECTORY);
-    }
-    fs.writeFile(CACHE_FILE_PATH, JSON.stringify(leaderboard), function(err) {
-      if (err) {
-        console.log("Error writing API cache file");
-        console.log(err);
-        return;
+        // Wait a litte bit between each api call. There are currently no API limits but still want to respect the server.
+        console.log("WAITING...");
+        await new Promise((r) => setTimeout(r, API_CALL_DELAY_IN_MS));
       }
-      console.log("API responses were cached");
-    });
-    updatedTime = Math.floor(new Date());
+
+      console.log("Total rows fetched", leaderboard.length);
+
+      // Write the result to the file system cache so we don't have to make the api call each time we build
+      if (!fs.existsSync(CACHE_DIRECTORY)) {
+        fs.mkdirSync(CACHE_DIRECTORY);
+      }
+      fs.writeFile(CACHE_FILE_PATH, JSON.stringify(leaderboard), function (
+        err
+      ) {
+        if (err) {
+          console.log("Error writing API cache file");
+          console.log(err);
+          return;
+        }
+        console.log("API responses were cached");
+      });
+      updatedTime = Math.floor(new Date());
+    }
+    return {
+      updatedTime: updatedTime,
+      leaderboard: leaderboard,
+    };
+  } catch (e) {
+    // If something fails here the page still builds
+    // We don't want Github Actions to build and deploy a site that didn't build properly (e.g. API requests fail)
+    // So, we'll do a hard exit here with a failure code.
+    console.log("Something went wrong during the build", e);
+    process.exit(1);
   }
-  return {
-    updatedTime: updatedTime,
-    leaderboard: leaderboard
-  };
 }
 
 // Accepts values in the form {color: "rgb(31, 119, 180)", value: 1066, name:"GusTTShowbiz"}
@@ -761,7 +777,7 @@ function highlightHistogramMarker(chartElement, values) {
   let numberOfBuckets = chartElement.calcdata[0].length;
 
   // Filter out any values that are undefined
-  values = values.filter(value => value.value);
+  values = values.filter((value) => value.value);
 
   // Get the unique colors, assign each color a number begining with 0 and counting by ones
   let counter = 1;
@@ -775,7 +791,7 @@ function highlightHistogramMarker(chartElement, values) {
   }
 
   // Make sure the values are ordered
-  values.sort(function(a, b) {
+  values.sort(function (a, b) {
     return a.value - b.value;
   });
 
@@ -812,7 +828,7 @@ function highlightHistogramMarker(chartElement, values) {
   if (colorscale.length == 1) {
     // If there is just one color for all the markers, just set the color directly. Using a size one array here doesn't work.
     styleUpdate = {
-      "marker.color": colorscale[0][1]
+      "marker.color": colorscale[0][1],
     };
   } else {
     // Update the color of specific markers on the 0th trace
@@ -820,7 +836,7 @@ function highlightHistogramMarker(chartElement, values) {
       "marker.color": [bucketColors],
       "marker.colorscale": [colorscale],
       "marker.cmax": maxValueInBucketColors,
-      "marker.cmin": 0
+      "marker.cmin": 0,
     };
   }
 
@@ -848,7 +864,7 @@ function highlightHistogramMarker(chartElement, values) {
         bordercolor: values[i].color,
         borderwidth: 1,
         arrowsize: 1,
-        arrowwidth: 1
+        arrowwidth: 1,
       };
       annotations.push(entry);
     }
@@ -862,7 +878,7 @@ function highlightHistogramMarker(chartElement, values) {
     chartElement.layout.yaxis.range[1]
   );
   let layoutUpdate = {
-    annotations: seperator.getSeparatedAnnotations()
+    annotations: seperator.getSeparatedAnnotations(),
   };
   Plotly.relayout(chartElement, layoutUpdate);
 }
@@ -877,7 +893,7 @@ function highlightScatterplotMarker(chartElement, values) {
       colors[values[i].color] = {
         counter: counter,
         x: [values[i].valueX],
-        y: [values[i].valueY]
+        y: [values[i].valueY],
       };
       counter++;
     } else {
@@ -901,7 +917,7 @@ function highlightScatterplotMarker(chartElement, values) {
       type: "scattergl",
       textposition: "top center",
       marker: { size: 8, color: prop },
-      hoverinfo: "skip"
+      hoverinfo: "skip",
     };
     newTraces.push(trace);
   }
@@ -929,7 +945,7 @@ function highlightScatterplotMarker(chartElement, values) {
         bordercolor: values[i].color,
         borderwidth: 1,
         arrowsize: 1,
-        arrowwidth: 1
+        arrowwidth: 1,
       };
       annotations.push(entry);
     }
@@ -942,7 +958,7 @@ function highlightScatterplotMarker(chartElement, values) {
     chartElement.layout.yaxis.range[1]
   );
   let update = {
-    annotations: seperator.getSeparatedAnnotations()
+    annotations: seperator.getSeparatedAnnotations(),
   };
   Plotly.relayout(chartElement, update);
 }
