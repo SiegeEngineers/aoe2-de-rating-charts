@@ -23,14 +23,20 @@ class Data {
     const RAW_TEAM_RANK = 6;
     const RAW_COMBO_RANK = 7;
 
-    let arrayData = JSON.parse(rawData);
+    let arrayData = undefined;
+    try {
+      arrayData = JSON.parse(rawData);
+    } catch (e) {
+      console.log("An error occured while parsing", rawData);
+      throw e;
+    }
     this.totalPlayers = arrayData.length;
     this.totalSoloPlayers = 0;
     this.totalTeamPlayers = 0;
     this.totalBothPlayers = 0;
 
     // Sort decending order by soloRating so we can determine rankings and a few other metrics
-    arrayData.sort(function(a, b) {
+    arrayData.sort(function (a, b) {
       if (a[RAW_SOLO_RATING] === b[RAW_SOLO_RATING]) {
         return 0;
       } else if (!a[RAW_SOLO_RATING]) {
@@ -72,7 +78,7 @@ class Data {
 
     // Calculate team rankings
     let copy = arrayData.slice(0);
-    copy.sort(function(a, b) {
+    copy.sort(function (a, b) {
       if (a[RAW_TEAM_RATING] === b[RAW_TEAM_RATING]) {
         return 0;
       } else if (!a[RAW_TEAM_RATING]) {
@@ -93,7 +99,7 @@ class Data {
     }
 
     // Calculate combo rankings
-    copy.sort(function(a, b) {
+    copy.sort(function (a, b) {
       if (a[RAW_COMBO_RATING] === b[RAW_COMBO_RATING]) {
         return 0;
       } else if (!a[RAW_COMBO_RATING]) {
@@ -146,7 +152,7 @@ class Data {
       let profileId = profileIds[i];
       this.selectData.push({
         value: profileId,
-        label: this.data[profileId][NAME]
+        label: this.data[profileId][NAME],
       });
     }
   }
