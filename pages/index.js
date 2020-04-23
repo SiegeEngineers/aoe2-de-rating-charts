@@ -42,6 +42,7 @@ export default class extends Component {
   };
 
   componentDidMount() {
+    let startTime = new Date();
     let dataSet = new Data(this.props.data);
     let histogramArray = []; // JSON.parse(this.props.histogram);
     let timestamp = this.props.timestamp ? this.props.timestamp : 0;
@@ -278,6 +279,13 @@ export default class extends Component {
           teamOne: parsed.team_one ? parsed.team_one.split("-") : [],
           teamTwo: parsed.team_two ? parsed.team_two.split("-") : [],
         });
+
+        // Record elapsed time
+        gtag("event", "timing_complete", {
+          name: "load",
+          value: new Date() - startTime,
+          event_category: "JS Dependencies",
+        });
       }.bind(this)
     );
   }
@@ -354,6 +362,11 @@ export default class extends Component {
       });
     }
     highlightScatterplotMarker(this.scatterplotDiv, scatterPlotColorInfo);
+
+    // Record pageview
+    gtag("event", "select_content", {
+      event_label: window.location.pathname + window.location.search,
+    });
   }
 
   render() {
@@ -417,7 +430,7 @@ export default class extends Component {
           <title>Age of Empires II: Definitive Edition Rating Charts</title>
           <meta
             name="description"
-            content="Histograms and a scatterplot for 'Age of Empires II: Definitive Edition' 1v1 Random Map and Team Random Map ratings. Updated daily."
+            content="Histograms and a scatterplot for 'Age of Empires II: Definitive Edition' 1v1 Random Map and Team Random Map ratings elo. Updated daily."
           />
           <meta property="og:image" content="https://i.imgur.com/cVLgt68.png" />
           <script
