@@ -16,8 +16,8 @@ class AnnotationSeparator {
     let rangeX = maxX - minX;
     let rangeY = maxY - minY;
 
-    this.annotationWidth = rangeX / 5;
-    this.annotationHeight = rangeY / 10;
+    this.annotationWidth = rangeX / 6;
+    this.annotationHeight = rangeY / 12;
 
     // Max and min include a margin
     this.minX = minX + this.annotationWidth / 2;
@@ -286,6 +286,11 @@ class AnnotationSeparator {
 
         annotation.ax = newX;
         annotation.ay = newY;
+      } else {
+        console.log(
+          "Unable to find a good place for the annotation: ",
+          annotation.text
+        );
       }
     }
 
