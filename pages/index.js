@@ -182,6 +182,7 @@ export default class extends Component {
     var data = [trace1];
 
     var layout = {
+      hovermode: "closest",
       showlegend: false,
       title: {
         text: "1v1 Random Map vs<br>Team Random Map",
