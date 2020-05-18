@@ -23,8 +23,8 @@ jobs:
           npm run nojekyll
       - name: Commit files
         run: |
-          git config --local user.email "thomasaustenbrown@gmail.com"
-          git config --local user.name "thbrown"
+          git config --local user.email ${{ secrets.ACTION_BUILD_EMAIL }}
+          git config --local user.name ${{ secrets.ACTION_BUILD_NAME }}
           git add -A
           git commit -m "Update page"
       - name: Push changes

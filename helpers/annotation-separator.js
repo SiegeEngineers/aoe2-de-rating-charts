@@ -16,7 +16,7 @@ class AnnotationSeparator {
     let rangeX = maxX - minX;
     let rangeY = maxY - minY;
 
-    this.annotationWidth = rangeX / 6;
+    this.annotationWidth = rangeX / 5;
     this.annotationHeight = rangeY / 12;
 
     // Max and min include a margin
