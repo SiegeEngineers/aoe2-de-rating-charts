@@ -6,7 +6,7 @@ module.exports = {
       "/": { page: "/", query: ["team_one", "team_two"] }
     };
   },
-  assetPrefix: !debug ? "/aoe2-de-rating-charts" : "",
+  assetPrefix: !debug ? "" : "",
   webpack: (config, { dev }) => {
     // Perform customizations to webpack config
     console.log("webpack");
