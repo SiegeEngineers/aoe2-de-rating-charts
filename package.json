@@ -8,7 +8,7 @@
     "build": "next build",
     "export": "next export -o docs",
     "nojekyll": "touch ./docs/.nojekyll",
-    "cname" "echo CNAME > ratings.aoe2.se",
+    "cname": "echo CNAME > ratings.aoe2.se",
     "start": "next start",
     "pages": "next build & next export -o docs & touch ./docs/.nojekyll",
     "test": "echo 'no tests :('"
