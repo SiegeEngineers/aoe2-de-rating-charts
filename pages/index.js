@@ -573,10 +573,10 @@ export default class extends Component {
               Sqrt(RandomMapRating^2 + TeamRandomMapRating^2)
               <br></br>
               Players will only appear if they have played at least 10 ranked
-              games
+              games and at least one ranked game in the last 30 days
               <br></br>
               View source code on{" "}
-              <a href="https://github.com/thbrown/aoe2-de-elo-histogram">
+              <a href="https://github.com/SiegeEngineers/aoe2-de-rating-charts">
                 github
               </a>
               <br></br>
