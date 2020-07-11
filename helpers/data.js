@@ -1,3 +1,5 @@
+const Tree = require("functional-red-black-tree");
+
 /**
  * This class is responsible for holding API data, calculating derived stats, and formating such data for ui component consumption.
  *
@@ -34,6 +36,9 @@ class Data {
     this.totalSoloPlayers = 0;
     this.totalTeamPlayers = 0;
     this.totalBothPlayers = 0;
+
+    this.soloRatingsTree = Tree();
+    this.teamRatingsTree = Tree();
 
     // Sort decending order by soloRating so we can determine rankings and a few other metrics
     arrayData.sort(function (a, b) {
@@ -155,6 +160,25 @@ class Data {
         label: this.data[profileId][NAME],
       });
     }
+
+    // Build rating -> percentile lookup trees
+    for (let i = 0; i < profileIds.length; i++) {
+      let teamRating = this.getTeamRating(profileIds[i]);
+      let teamPercentile = this.getTeamPercentile(profileIds[i]);
+      this.teamRatingsTree = this.teamRatingsTree.insert(
+        teamRating,
+        teamPercentile
+      );
+
+      let soloRating = this.getSoloRating(profileIds[i]);
+      let soloPercentile = this.getSoloPercentile(profileIds[i]);
+      this.soloRatingsTree = this.soloRatingsTree.insert(
+        soloRating,
+        soloPercentile
+      );
+
+      this.teamData.push();
+    }
   }
 
   getSelectData() {
@@ -227,6 +251,14 @@ class Data {
       return comboRank;
     }
     return (this.totalSoloPlayers - (comboRank - 1)) / this.totalSoloPlayers;
+  }
+
+  getPercentileForSoloRating(rating) {
+    return this.soloRatingsTree.le(rating).value;
+  }
+
+  getPercentileForTeamRating(rating) {
+    return this.teamRatingsTree.le(rating).value;
   }
 
   formatPercentage(value) {

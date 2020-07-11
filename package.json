@@ -20,8 +20,9 @@
   "author": "thbrown",
   "license": "ISC",
   "dependencies": {
+    "functional-red-black-tree": "^1.0.1",
     "got": "^10.6.0",
-    "next": "^9.3.2",
+    "next": "^9.4.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-select": "^3.1.0"
