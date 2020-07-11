@@ -57,7 +57,15 @@ export default class extends Component {
       marker: {
         color: DEFAULT_COLOR,
       },
-      hovertemplate: "# of Players: %{y}<extra></extra>",
+      hovertemplate:
+        "# of Players: %{y}<br>Rating Range: %{x}<br>Percentile: %{text}<extra></extra>",
+      selected: {
+        marker: {
+          color: "red",
+        },
+      },
+      hovermode: "x unified",
+      hoveron: "points+fills",
     };
     var layout = {
       title: {
@@ -94,6 +102,7 @@ export default class extends Component {
         fixedrange: true,
       },
       marker: { color: DEFAULT_COLOR },
+      hovermode: "false",
     };
     var data = [trace];
     let randomMapPlot = Plotly.newPlot("random_map_histogram", data, layout, {
@@ -114,7 +123,8 @@ export default class extends Component {
       marker: {
         color: DEFAULT_COLOR,
       },
-      hovertemplate: "# of Players: %{y}<extra></extra>",
+      hovertemplate:
+        "# of Players: %{y}<br>Rating Range: %{x}<br>Percentile: %{text}<extra></extra>",
     };
     var layout = {
       title: {
@@ -272,6 +282,10 @@ export default class extends Component {
           },
           true
         );
+
+        // Now that the plots have been rendered, we know the characteristics of the bins (count, range, ratings) so we can add the text lables
+        addTextAttributeToTrace(this.randomMapDiv, dataSet, "solo");
+        addTextAttributeToTrace(this.teamRandomMapDiv, dataSet, "team");
 
         let queryString = window.location.search;
         let parsed = parseQueryString(queryString);
@@ -573,7 +587,7 @@ export default class extends Component {
               Sqrt(RandomMapRating^2 + TeamRandomMapRating^2)
               <br></br>
               Players will only appear if they have played at least 10 ranked
-              games and at least one ranked game in the last 30 days
+              games and at least one ranked game in the last 28 days
               <br></br>
               View source code on{" "}
               <a href="https://github.com/SiegeEngineers/aoe2-de-rating-charts">
@@ -975,6 +989,27 @@ function highlightScatterplotMarker(chartElement, values) {
     annotations: seperator.getSeparatedAnnotations(),
   };
   Plotly.relayout(chartElement, update);
+}
+
+function addTextAttributeToTrace(chartElement, dataset, type) {
+  let numberOfBuckets = chartElement.calcdata[0].length;
+  let textArray = [];
+  for (let i = 0; i < numberOfBuckets; i++) {
+    let avg = chartElement.calcdata[0][i].p;
+    if (type === "team") {
+      textArray.push(
+        dataset.formatPercentage(dataset.getPercentileForTeamRating(avg))
+      );
+    } else if (type === "solo") {
+      textArray.push(
+        dataset.formatPercentage(dataset.getPercentileForSoloRating(avg))
+      );
+    }
+  }
+  let textUpdate = {
+    text: [textArray],
+  };
+  Plotly.update(chartElement, textUpdate);
 }
 
 function parseQueryString(queryString) {
