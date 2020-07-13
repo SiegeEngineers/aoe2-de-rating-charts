@@ -2,6 +2,9 @@
 
 Live at: https://ratings.aoe2.se/
 
+Random Map: https://ratings.aoe2.se
+Deathmatch: https://ratings.aoe2.se/deathmatch
+
 Stats are updated automatically, every day via github actions.
 
 Moved from: https://github.com/thbrown/aoe2-de-rating-charts
