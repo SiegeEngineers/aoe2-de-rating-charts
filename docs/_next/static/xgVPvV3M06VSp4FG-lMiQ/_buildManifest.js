@@ -1,0 +1,1 @@
+self.__BUILD_MANIFEST = (function(a,b){return {"/":[a,b],"/deathmatch":[a,b],"/index":[a,b]}}("static\u002Fchunks\u002F615c6e1167f34d7ccf258d1649b962cc735c3327.6a1aa8c9082becedb4a9.js","static\u002Fcss\u002F6bb9739068a8e3900c17.css"));self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
