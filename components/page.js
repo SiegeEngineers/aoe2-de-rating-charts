@@ -455,6 +455,7 @@ export default class extends Component {
             src="https://www.googletagmanager.com/gtag/js?id=UA-163727547-1"
           ></script>
           <script src="ga.js"></script>
+          <link rel="shortcut icon" href="/favicon.ico" />
         </head>
         <body style={{ fontFamily: FONT }}>
           <div className={styles.center}>
