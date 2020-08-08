@@ -326,6 +326,14 @@ class AnnotationSeparator {
       }
     }
 
+    // Sort them by arrow distance, this helps prevent arrows from covering the annotation lables
+    this.inputAnnotations.sort(function (a, b) {
+      return (
+        Math.sqrt(b.ax * b.ax + b.ay * b.ay) -
+        Math.sqrt(a.ax * a.ax + a.ay * a.ay)
+      );
+    });
+
     return this.inputAnnotations;
   }
 }
