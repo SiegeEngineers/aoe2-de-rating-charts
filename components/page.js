@@ -28,7 +28,6 @@ TODO:
 4) Variable names...
 13) Select box turns blue when selected instead of team color
 14) Color chips in select box
-15) Are a different number of buckets in each histogram?
 16) Remove 'random map' ids from this component now that id displays deathmatch as well
 */
 
@@ -245,18 +244,33 @@ export default class extends Component {
       return e instanceof RangeError;
     }
 
+    Promise.resolve(randomMapPlot).then(function (value) {
+      console.log("DONE1", new Date() - startTime);
+    });
+
+    Promise.resolve(teamRandomMapPlot).then(function (value) {
+      console.log("DONE2", new Date() - startTime);
+    });
+
+    Promise.resolve(scatterPlot).then(function (value) {
+      console.log("DONE3", new Date() - startTime);
+    });
+
     // Remove the loading div
     Promise.all([randomMapPlot, teamRandomMapPlot, scatterPlot]).then(
       function (values) {
+        let contentDiv = document.getElementById("loading-hider");
+        contentDiv.classList.remove("hidden");
+
         let loadingDiv = document.getElementById("loading");
-        loadingDiv.style.display = "none";
+        loadingDiv.classList.add("none");
 
         this.randomMapDiv = values[0];
         this.teamRandomMapDiv = values[1];
         this.scatterplotDiv = values[2];
 
         // Adding these event make it possible to scroll the page whenever touching a plotly chart.
-        // Without them there appears to be some plotly event's that prevent the scroll action.
+        // Without them there appears to be some plotly events that prevent the scroll action.
         this.randomMapDiv.addEventListener(
           "touchstart",
           function (event) {
@@ -304,6 +318,7 @@ export default class extends Component {
   }
 
   componentDidUpdate() {
+    // TODO: Move a bunch of this to a web workers?
     // Don't update the graphs if they were never ready to beign with
     if (!this.randomMapDiv || !this.teamRandomMapDiv || !this.scatterplotDiv) {
       return;
@@ -459,35 +474,6 @@ export default class extends Component {
         </head>
         <body style={{ fontFamily: FONT }}>
           <div className={styles.center}>
-            <div style={{ display: "none" }}>
-              PROCESS '{process.env.BACKEND_URL}'
-            </div>
-            <div
-              id="loading"
-              style={{
-                backgroundColor: "black",
-                display: "flex",
-                zIndex: 1,
-                padding: "10px",
-                borderRadius: "25px",
-              }}
-            >
-              <img
-                src="puff.svg"
-                alt="Loading..."
-                style={{
-                  backgroundColor: "black",
-                  width: "100px",
-                  height: "100px",
-                  padding: "10px",
-                }}
-              ></img>
-              <div
-                style={{ padding: "33px", color: "white", fontSize: "30pt" }} // FIX ME to PX
-              >
-                Loading...
-              </div>
-            </div>
             <div>
               <h2>Age of Empires II: Definitive Edition Rating Charts</h2>
               <div
@@ -508,86 +494,107 @@ export default class extends Component {
                 </i>
               </div>
             </div>
-            <div id="selectors">
-              <div>
-                <label htmlFor="teamOne">Team 1:</label>
-                <div
-                  style={{
-                    border: TEAM_ONE_COLOR,
-                    borderStyle: "solid",
-                    borderRadius: "7px",
-                  }}
-                >
-                  <Select
-                    id="teamOne"
-                    dataSet={this.state.data}
-                    blacklist={this.state.teamTwo}
-                    value={this.state.teamOne}
-                    onSelection={function (selection) {
-                      // This setTimeout seems to help responsiveness
-                      setTimeout(
-                        function () {
-                          this.setState({ teamOne: selection });
-                        }.bind(this),
-                        1
-                      );
-                      if (history) {
-                        history.pushState(
-                          null,
-                          "",
-                          "?team_one=" +
-                            selection.join("-") +
-                            "&team_two=" +
-                            this.state.teamTwo.join("-")
-                        );
-                      }
-                    }.bind(this)}
-                  ></Select>
-                </div>
-              </div>
-              <div style={{ marginTop: "16px" }}>
-                <label htmlFor="teamTwo">Team 2:</label>
-                <div
-                  style={{
-                    border: TEAM_TWO_COLOR,
-                    borderStyle: "solid",
-                    borderRadius: "7px",
-                  }}
-                >
-                  <Select
-                    id="teamTwo"
-                    dataSet={this.state.data}
-                    blacklist={this.state.teamOne}
-                    value={this.state.teamTwo}
-                    onSelection={function (selection) {
-                      // This setTimeout seems to help responsiveness
-                      setTimeout(
-                        function () {
-                          this.setState({ teamTwo: selection });
-                        }.bind(this),
-                        1
-                      );
-                      if (history) {
-                        history.pushState(
-                          null,
-                          "",
-                          "?team_one=" +
-                            this.state.teamOne.join("-") +
-                            "&team_two=" +
-                            selection.join("-")
-                        );
-                      }
-                    }.bind(this)}
-                  ></Select>
-                </div>
+            <div
+              id="loading"
+              style={{
+                zIndex: 1,
+                margin: "auto",
+                width: "8%",
+                marginTop: "100px",
+              }}
+            >
+              <div className="loading-spinner">
+                <div className="spinner-dot"></div>
+                <div className="spinner-dot"></div>
+                <div className="spinner-dot"></div>
+                <div className="spinner-dot"></div>
+                <div className="spinner-dot"></div>
+                <div className="spinner-dot"></div>
               </div>
             </div>
-            <hr className={styles.divider}></hr>
-            <div id="table">{table}</div>
-            <hr className={styles.divider}></hr>
-            <div id="random_map_histogram"></div>
-            <div id="team_random_map_histogram"></div>
-            <div id="combo_scatterplot"></div>
+            <div id="loading-hider" className="hidden">
+              <div id="selectors">
+                <div>
+                  <label htmlFor="teamOne">Team 1:</label>
+                  <div
+                    style={{
+                      border: TEAM_ONE_COLOR,
+                      borderStyle: "solid",
+                      borderRadius: "7px",
+                    }}
+                  >
+                    <Select
+                      id="teamOne"
+                      dataSet={this.state.data}
+                      blacklist={this.state.teamTwo}
+                      value={this.state.teamOne}
+                      onSelection={function (selection) {
+                        // This setTimeout seems to help responsiveness
+                        setTimeout(
+                          function () {
+                            this.setState({ teamOne: selection });
+                          }.bind(this),
+                          1
+                        );
+                        if (history) {
+                          history.pushState(
+                            null,
+                            "",
+                            "?team_one=" +
+                              selection.join("-") +
+                              "&team_two=" +
+                              this.state.teamTwo.join("-")
+                          );
+                        }
+                      }.bind(this)}
+                    ></Select>
+                  </div>
+                </div>
+                <div style={{ marginTop: "16px" }}>
+                  <label htmlFor="teamTwo">Team 2:</label>
+                  <div
+                    style={{
+                      border: TEAM_TWO_COLOR,
+                      borderStyle: "solid",
+                      borderRadius: "7px",
+                    }}
+                  >
+                    <Select
+                      id="teamTwo"
+                      dataSet={this.state.data}
+                      blacklist={this.state.teamOne}
+                      value={this.state.teamTwo}
+                      onSelection={function (selection) {
+                        // This setTimeout seems to help responsiveness
+                        setTimeout(
+                          function () {
+                            this.setState({ teamTwo: selection });
+                          }.bind(this),
+                          1
+                        );
+                        if (history) {
+                          history.pushState(
+                            null,
+                            "",
+                            "?team_one=" +
+                              this.state.teamOne.join("-") +
+                              "&team_two=" +
+                              selection.join("-")
+                          );
+                        }
+                      }.bind(this)}
+                    ></Select>
+                  </div>
+                </div>
+              </div>
+
+              <hr className={styles.divider}></hr>
+              <div id="table">{table}</div>
+              <hr className={styles.divider}></hr>
+              <div id="random_map_histogram"></div>
+              <div id="team_random_map_histogram"></div>
+              <div id="combo_scatterplot"></div>
+            </div>
             <div id="footer" style={{ fontSize: "12px", margin: "10px" }}>
               <div id="last_updated"></div>* Combo rating =
               Sqrt(RandomMapRating^2 + TeamRandomMapRating^2)

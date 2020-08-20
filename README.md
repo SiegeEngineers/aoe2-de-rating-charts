@@ -35,8 +35,8 @@ For example:
 
 1. Install serve globally, you only need to do this once `npm install -g serve`
 1. Navigate the the site's root directory `cd ./docs`
-1. Serve the site `serve -p 8080`
-1. Visit `localhost:8080` in your browser
+1. Serve the site `serve -p 3000`
+1. Visit `localhost:3000` in your browser
 
 ## Github Pages
 

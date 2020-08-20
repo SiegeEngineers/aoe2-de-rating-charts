@@ -328,9 +328,13 @@ class AnnotationSeparator {
 
     // Sort them by arrow distance, this helps prevent arrows from covering the annotation lables
     this.inputAnnotations.sort(function (a, b) {
+      let lengthxa = Math.abs(a.x - a.ax);
+      let lengthya = Math.abs(a.y - a.ay);
+      let lengthxb = Math.abs(b.x - b.ax);
+      let lengthyb = Math.abs(b.y - b.ay);
       return (
-        Math.sqrt(b.ax * b.ax + b.ay * b.ay) -
-        Math.sqrt(a.ax * a.ax + a.ay * a.ay)
+        Math.sqrt(lengthxb * lengthxb + lengthyb * lengthyb) -
+        Math.sqrt(lengthxa * lengthxa + lengthya * lengthya)
       );
     });
 
