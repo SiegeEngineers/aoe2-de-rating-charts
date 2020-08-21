@@ -244,18 +244,6 @@ export default class extends Component {
       return e instanceof RangeError;
     }
 
-    Promise.resolve(randomMapPlot).then(function (value) {
-      console.log("DONE1", new Date() - startTime);
-    });
-
-    Promise.resolve(teamRandomMapPlot).then(function (value) {
-      console.log("DONE2", new Date() - startTime);
-    });
-
-    Promise.resolve(scatterPlot).then(function (value) {
-      console.log("DONE3", new Date() - startTime);
-    });
-
     // Remove the loading div
     Promise.all([randomMapPlot, teamRandomMapPlot, scatterPlot]).then(
       function (values) {
@@ -685,8 +673,6 @@ function highlightHistogramMarker(chartElement, values) {
     };
   }
 
-  Plotly.restyle(chartElement, styleUpdate, 0);
-
   // Add the annotations!
   let rangeX =
     chartElement.layout.xaxis.range[1] - chartElement.layout.xaxis.range[0];
@@ -725,7 +711,10 @@ function highlightHistogramMarker(chartElement, values) {
   let layoutUpdate = {
     annotations: seperator.getSeparatedAnnotations(),
   };
-  Plotly.relayout(chartElement, layoutUpdate);
+
+  // Update the plot with the highlights and annotations
+  Object.assign(chartElement.layout, layoutUpdate);
+  Plotly.restyle(chartElement, styleUpdate);
 }
 
 // Accepts values in the form {color: "rgb(31, 119, 180)", valueX: 1066, valueY: 1442, name:"PizzaBob"}
@@ -766,7 +755,6 @@ function highlightScatterplotMarker(chartElement, values) {
     };
     newTraces.push(trace);
   }
-  Plotly.addTraces(chartElement, newTraces);
 
   // Add the annotations!
   let rangeX =
@@ -805,7 +793,14 @@ function highlightScatterplotMarker(chartElement, values) {
   let update = {
     annotations: seperator.getSeparatedAnnotations(),
   };
-  Plotly.relayout(chartElement, update);
+
+  // Refresh the plot to apply the changes
+  Plotly.react(
+    chartElement,
+    chartElement.data.concat(newTraces),
+    Object.assign(chartElement.layout, update),
+    chartElement.config
+  );
 }
 
 function addTextAttributeToTrace(chartElement, dataset, type) {
