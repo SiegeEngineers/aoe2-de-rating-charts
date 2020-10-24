@@ -28,7 +28,7 @@ class ApiCaller {
       );
 
       let randomMapLeaderboard = randomMapLeaderboardResult.leaderboard;
-      let teamRandomMapleaderboard = teamRandomMapLeaderboardResult.leaderboard;
+      let teamRandomMapLeaderboard = teamRandomMapLeaderboardResult.leaderboard;
       updatedTime = Math.min(
         randomMapLeaderboardResult.updatedTime,
         teamRandomMapLeaderboardResult.updatedTime
@@ -61,10 +61,10 @@ class ApiCaller {
         randomMapLeaderboard.length
       );
 
-      for (let i = 0; i < teamRandomMapleaderboard.length; i++) {
-        let name = teamRandomMapleaderboard[i].name;
-        let profileId = teamRandomMapleaderboard[i].profile_id;
-        let teamRating = teamRandomMapleaderboard[i].rating;
+      for (let i = 0; i < teamRandomMapLeaderboard.length; i++) {
+        let name = teamRandomMapLeaderboard[i].name;
+        let profileId = teamRandomMapLeaderboard[i].profile_id;
+        let teamRating = teamRandomMapLeaderboard[i].rating;
 
         if (aoeData[profileId] == undefined) {
           aoeData[profileId] = [name, null, teamRating];
@@ -82,7 +82,7 @@ class ApiCaller {
 
       console.log(
         "Number of ranked team random map players",
-        teamRandomMapleaderboard.length
+        teamRandomMapLeaderboard.length
       );
 
       let allData = [];
