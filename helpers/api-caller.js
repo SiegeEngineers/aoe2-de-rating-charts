@@ -12,7 +12,7 @@ class ApiCaller {
    * This function only gets called when the page is built. It does not become a part of the web page. The return value of this function is
    * sent to the React component above as props.
    *
-   * Leaderbaord ids:
+   * leaderboard ids:
    * Unranked=0, 1v1 Deathmatch=1, Team Deathmatch=2, 1v1 Random Map=3, Team Random Map=4
    */
   async getApiData(leaderboardIdOne, leaderboardIdTwo) {
@@ -28,7 +28,7 @@ class ApiCaller {
       );
 
       let randomMapLeaderboard = randomMapLeaderboardResult.leaderboard;
-      let teamRandomMapLeaderbaord = teamRandomMapLeaderboardResult.leaderboard;
+      let teamRandomMapLeaderboard = teamRandomMapLeaderboardResult.leaderboard;
       updatedTime = Math.min(
         randomMapLeaderboardResult.updatedTime,
         teamRandomMapLeaderboardResult.updatedTime
@@ -61,10 +61,10 @@ class ApiCaller {
         randomMapLeaderboard.length
       );
 
-      for (let i = 0; i < teamRandomMapLeaderbaord.length; i++) {
-        let name = teamRandomMapLeaderbaord[i].name;
-        let profileId = teamRandomMapLeaderbaord[i].profile_id;
-        let teamRating = teamRandomMapLeaderbaord[i].rating;
+      for (let i = 0; i < teamRandomMapLeaderboard.length; i++) {
+        let name = teamRandomMapLeaderboard[i].name;
+        let profileId = teamRandomMapLeaderboard[i].profile_id;
+        let teamRating = teamRandomMapLeaderboard[i].rating;
 
         if (aoeData[profileId] == undefined) {
           aoeData[profileId] = [name, null, teamRating];
@@ -82,7 +82,7 @@ class ApiCaller {
 
       console.log(
         "Number of ranked team random map players",
-        teamRandomMapLeaderbaord.length
+        teamRandomMapLeaderboard.length
       );
 
       let allData = [];
