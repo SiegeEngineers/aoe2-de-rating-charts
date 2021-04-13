@@ -28,7 +28,7 @@ TODO:
 4) Variable names...
 13) Select box turns blue when selected instead of team color
 14) Color chips in select box
-16) Remove 'random map' ids from this component now that id displays deathmatch as well
+16) Remove 'random map' ids from this component now that it displays deathmatch as well
 */
 
 export default class extends Component {
@@ -49,7 +49,7 @@ export default class extends Component {
     // Random Map Histogram
 
     var trace = {
-      x: dataSet.getAllSoloRatings(),
+      x: dataSet.getRatingsArray(this.props.dataLabelOne),
       type: "histogram",
       marker: {
         color: DEFAULT_COLOR,
@@ -115,7 +115,7 @@ export default class extends Component {
       teamRandomMapScores[i] = histogramArray[i][2];
     }
     var trace = {
-      x: dataSet.getAllTeamRatings(),
+      x: dataSet.getRatingsArray(this.props.dataLabelTwo),
       type: "histogram",
       marker: {
         color: DEFAULT_COLOR,
@@ -171,11 +171,30 @@ export default class extends Component {
       }
     );
 
+    // TODO: move this into data?
+    let fullNames = dataSet.getAllNames();
+    let fullX = dataSet.getRatingsArray(this.props.dataLabelOne);
+    let fullY = dataSet.getRatingsArray(this.props.dataLabelTwo);
+    let filteredNames = [];
+    let filteredX = [];
+    let filteredY = [];
+    for (
+      let i = 0;
+      i < dataSet.getRatingsArray(this.props.dataLabelOne).length;
+      i++
+    ) {
+      if (fullX[i] !== undefined && fullY[i] !== undefined) {
+        filteredNames.push(fullNames[i]);
+        filteredX.push(fullX[i]);
+        filteredY.push(fullY[i]);
+      }
+    }
+
     // Combo Scatterplot
     var trace1 = {
-      x: dataSet.getAllSoloRatings(),
-      y: dataSet.getAllTeamRatings(),
-      text: dataSet.getAllNames(),
+      x: filteredX,
+      y: filteredY,
+      text: filteredNames,
       mode: "markers",
       type: "scattergl",
       textposition: "top center",
@@ -284,8 +303,16 @@ export default class extends Component {
         );
 
         // Now that the plots have been rendered, we know the characteristics of the bins (count, range, ratings) so we can add the text lables
-        addTextAttributeToTrace(this.randomMapDiv, dataSet, "solo");
-        addTextAttributeToTrace(this.teamRandomMapDiv, dataSet, "team");
+        addTextAttributeToTrace(
+          this.randomMapDiv,
+          dataSet,
+          this.props.dataLabelOne
+        );
+        addTextAttributeToTrace(
+          this.teamRandomMapDiv,
+          dataSet,
+          this.props.dataLabelTwo
+        );
 
         let queryString = window.location.search;
         let parsed = parseQueryString(queryString);
@@ -307,10 +334,12 @@ export default class extends Component {
 
   componentDidUpdate() {
     // TODO: Move a bunch of this to a web workers?
-    // Don't update the graphs if they were never ready to beign with
+    // Don't update the graphs if they were never ready to begin with
     if (!this.randomMapDiv || !this.teamRandomMapDiv || !this.scatterplotDiv) {
       return;
     }
+
+    let startTime = new Date().getTime();
 
     let teamOneSelection = this.state.teamOne
       ? this.state.teamOne.filter((profileId) =>
@@ -328,14 +357,20 @@ export default class extends Component {
     for (let i = 0; i < teamOneSelection.length; i++) {
       soloRandomMapColorInfo.push({
         color: TEAM_ONE_COLOR,
-        value: this.state.data.getSoloRating(teamOneSelection[i]),
+        value: this.state.data.getPlayerRating(
+          this.props.dataLabelOne,
+          teamOneSelection[i]
+        ),
         name: this.state.data.getName(teamOneSelection[i]),
       });
     }
     for (let i = 0; i < teamTwoSelection.length; i++) {
       soloRandomMapColorInfo.push({
         color: TEAM_TWO_COLOR,
-        value: this.state.data.getSoloRating(teamTwoSelection[i]),
+        value: this.state.data.getPlayerRating(
+          this.props.dataLabelOne,
+          teamTwoSelection[i]
+        ),
         name: this.state.data.getName(teamTwoSelection[i]),
       });
     }
@@ -346,14 +381,20 @@ export default class extends Component {
     for (let i = 0; i < teamOneSelection.length; i++) {
       teamRandomMapColorInfo.push({
         color: TEAM_ONE_COLOR,
-        value: this.state.data.getTeamRating(teamOneSelection[i]),
+        value: this.state.data.getPlayerRating(
+          this.props.dataLabelTwo,
+          teamOneSelection[i]
+        ),
         name: this.state.data.getName(teamOneSelection[i]),
       });
     }
     for (let i = 0; i < teamTwoSelection.length; i++) {
       teamRandomMapColorInfo.push({
         color: TEAM_TWO_COLOR,
-        value: this.state.data.getTeamRating(teamTwoSelection[i]),
+        value: this.state.data.getPlayerRating(
+          this.props.dataLabelTwo,
+          teamTwoSelection[i]
+        ),
         name: this.state.data.getName(teamTwoSelection[i]),
       });
     }
@@ -364,16 +405,28 @@ export default class extends Component {
     for (let i = 0; i < teamOneSelection.length; i++) {
       scatterPlotColorInfo.push({
         color: TEAM_ONE_COLOR,
-        valueX: this.state.data.getSoloRating(teamOneSelection[i]),
-        valueY: this.state.data.getTeamRating(teamOneSelection[i]),
+        valueX: this.state.data.getPlayerRating(
+          this.props.dataLabelOne,
+          teamOneSelection[i]
+        ),
+        valueY: this.state.data.getPlayerRating(
+          this.props.dataLabelTwo,
+          teamOneSelection[i]
+        ),
         name: this.state.data.getName(teamOneSelection[i]),
       });
     }
     for (let i = 0; i < teamTwoSelection.length; i++) {
       scatterPlotColorInfo.push({
         color: TEAM_TWO_COLOR,
-        valueX: this.state.data.getSoloRating(teamTwoSelection[i]),
-        valueY: this.state.data.getTeamRating(teamTwoSelection[i]),
+        valueX: this.state.data.getPlayerRating(
+          this.props.dataLabelOne,
+          teamTwoSelection[i]
+        ),
+        valueY: this.state.data.getPlayerRating(
+          this.props.dataLabelTwo,
+          teamTwoSelection[i]
+        ),
         name: this.state.data.getName(teamTwoSelection[i]),
       });
     }
@@ -383,6 +436,8 @@ export default class extends Component {
     gtag("event", "select_content", {
       event_label: window.location.pathname + window.location.search,
     });
+
+    console.log("Update time ", new Date().getTime() - startTime);
   }
 
   render() {
@@ -402,26 +457,28 @@ export default class extends Component {
                 borderCollapse: "collapse",
               }}
             >
-              <tr>
-                <th rowSpan="2" width="28%"></th>
-                <th colSpan="2" width="24%">
-                  1v1
-                </th>
-                <th colSpan="2" width="24%">
-                  Team
-                </th>
-                <th colSpan="2" width="24%">
-                  Combo*
-                </th>
-              </tr>
-              <tr>
-                <td width="12%">Rating</td>
-                <td width="12%">%</td>
-                <td width="12%">Rating</td>
-                <td width="12%">%</td>
-                <td width="12%">Rating</td>
-                <td width="12%">%</td>
-              </tr>
+              <tbody>
+                <tr>
+                  <th rowSpan="2" width="28%"></th>
+                  <th colSpan="2" width="24%">
+                    1v1
+                  </th>
+                  <th colSpan="2" width="24%">
+                    Team
+                  </th>
+                  <th colSpan="2" width="24%">
+                    Combo*
+                  </th>
+                </tr>
+                <tr>
+                  <td width="12%">Rating</td>
+                  <td width="12%">%</td>
+                  <td width="12%">Rating</td>
+                  <td width="12%">%</td>
+                  <td width="12%">Rating</td>
+                  <td width="12%">%</td>
+                </tr>
+              </tbody>
             </table>
           </div>
           <TeamTable
@@ -429,12 +486,18 @@ export default class extends Component {
             data={this.state.data}
             players={this.state.teamOne}
             color={TEAM_ONE_COLOR}
+            dataLabelOne={this.props.dataLabelOne}
+            dataLabelTwo={this.props.dataLabelTwo}
+            dataLabelThree={this.props.dataLabelThree}
           ></TeamTable>
           <TeamTable
             teamLabel="Team 2"
             data={this.state.data}
             players={this.state.teamTwo}
             color={TEAM_TWO_COLOR}
+            dataLabelOne={this.props.dataLabelOne}
+            dataLabelTwo={this.props.dataLabelTwo}
+            dataLabelThree={this.props.dataLabelThree}
           ></TeamTable>
         </div>
       );
@@ -451,7 +514,7 @@ export default class extends Component {
           <meta property="og:image" content="https://i.imgur.com/cVLgt68.png" />
           <script
             type="text/javascript"
-            src="https://cdn.plot.ly/plotly-latest.min.js"
+            src="https://cdn.plot.ly/plotly-strict-2.0.0-rc.0.min.js"
           ></script>
           <script
             async
@@ -513,9 +576,12 @@ export default class extends Component {
                   >
                     <Select
                       id="teamOne"
+                      color={TEAM_ONE_COLOR}
                       dataSet={this.state.data}
                       blacklist={this.state.teamTwo}
                       value={this.state.teamOne}
+                      ratingLabelOne={this.props.dataLabelOne}
+                      ratingLabelTwo={this.props.dataLabelTwo}
                       onSelection={function (selection) {
                         // This setTimeout seems to help responsiveness
                         setTimeout(
@@ -549,9 +615,12 @@ export default class extends Component {
                   >
                     <Select
                       id="teamTwo"
+                      color={TEAM_TWO_COLOR}
                       dataSet={this.state.data}
                       blacklist={this.state.teamOne}
                       value={this.state.teamTwo}
+                      ratingLabelOne={this.props.dataLabelOne}
+                      ratingLabelTwo={this.props.dataLabelTwo}
                       onSelection={function (selection) {
                         // This setTimeout seems to help responsiveness
                         setTimeout(
@@ -590,7 +659,11 @@ export default class extends Component {
               Players will only appear if they have played at least 10 ranked
               games and at least one ranked game in the last 28 days
               <br></br>
-              View source code on{" "}
+              <br></br>
+              <a href="https://endlesswips.com/aoe2-de-rating-charts#ratings">
+                About
+              </a>
+              <br></br> View source code on{" "}
               <a href="https://github.com/SiegeEngineers/aoe2-de-rating-charts">
                 github
               </a>
@@ -808,15 +881,9 @@ function addTextAttributeToTrace(chartElement, dataset, type) {
   let textArray = [];
   for (let i = 0; i < numberOfBuckets; i++) {
     let avg = chartElement.calcdata[0][i].p;
-    if (type === "team") {
-      textArray.push(
-        dataset.formatPercentage(dataset.getPercentileForTeamRating(avg))
-      );
-    } else if (type === "solo") {
-      textArray.push(
-        dataset.formatPercentage(dataset.getPercentileForSoloRating(avg))
-      );
-    }
+    textArray.push(
+      dataset.formatPercentage(dataset.getPercentileForRating(type, avg))
+    );
   }
   let textUpdate = {
     text: [textArray],

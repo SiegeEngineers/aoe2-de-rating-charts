@@ -1,264 +1,150 @@
-const Tree = require("functional-red-black-tree");
+import PercentileTree from "../helpers/percentile-tree.js";
+import Utils from "../helpers/utils.js";
 
 /**
- * This class is responsible for holding API data, calculating derived stats, and formating such data for ui component consumption.
+ * This class is responsible for holding API data, calculating derived stats, and formatting such data for ui component consumption.
  *
- * In several cases here we are assuming nobody will ever have a 0 rating.
+ * When using this class, you don't need to pass in data for all leaderboards.
+ *
+ * To make the if statements easier ratings of "0" exactly aren't counted
  */
-const NAME = 0;
-const SOLO_RATING = 1;
-const TEAM_RATING = 2;
-const COMBO_RATING = 3;
-const SOLO_RANK = 4;
-const TEAM_RANK = 5;
-const COMBO_RANK = 6;
+const Labels = Utils.getAllLabels();
 
 class Data {
-  constructor(rawData) {
-    // Indexes in the raw data are different than the ones on the processed data
-    const RAW_PROFILE_ID = 0;
-    const RAW_NAME = 1;
-    const RAW_SOLO_RATING = 2;
-    const RAW_TEAM_RATING = 3;
-    const RAW_COMBO_RATING = 4;
-    const RAW_SOLO_RANK = 5;
-    const RAW_TEAM_RANK = 6;
-    const RAW_COMBO_RANK = 7;
-
-    let arrayData = undefined;
+  constructor(rawDataString) {
+    this.rawData = undefined;
     try {
-      arrayData = JSON.parse(rawData);
+      this.rawData = JSON.parse(rawDataString);
     } catch (e) {
-      console.log("An error occured while parsing", rawData);
+      console.log("An error occurred while parsing", rawDataString);
       throw e;
     }
-    this.totalPlayers = arrayData.length;
-    this.totalSoloPlayers = 0;
-    this.totalTeamPlayers = 0;
-    this.totalBothPlayers = 0;
 
-    this.soloRatingsTree = Tree();
-    this.teamRatingsTree = Tree();
+    // Add derived properties to the rawData
 
-    // Sort decending order by soloRating so we can determine rankings and a few other metrics
-    arrayData.sort(function (a, b) {
-      if (a[RAW_SOLO_RATING] === b[RAW_SOLO_RATING]) {
-        return 0;
-      } else if (!a[RAW_SOLO_RATING]) {
-        return 1;
-      } else if (!b[RAW_SOLO_RATING]) {
-        return -1;
-      }
-      return a[RAW_SOLO_RATING] < b[RAW_SOLO_RATING] ? 1 : -1;
-    });
-
-    for (let i = 0; i < arrayData.length; i++) {
-      const soloRating = arrayData[i][RAW_SOLO_RATING];
-      const teamRating = arrayData[i][RAW_TEAM_RATING];
-
-      const soloRank = soloRating ? i + 1 : null;
-      arrayData[i][RAW_SOLO_RANK] = soloRank;
-
-      const comboRanking =
-        soloRating && teamRating
-          ? Math.round(
-              Math.sqrt(Math.pow(soloRating, 2) + Math.pow(teamRating, 2))
-            )
-          : null;
-
-      arrayData[i][RAW_COMBO_RATING] = comboRanking;
-
-      if (soloRating) {
-        this.totalSoloPlayers++;
-      }
-
-      if (teamRating) {
-        this.totalTeamPlayers++;
-      }
-
-      if (soloRating && teamRating) {
-        this.totalBothPlayers++;
-      }
+    // Random map combo ratings
+    let dataLabelOne = Labels.RANDOM_MAP_RATING;
+    let dataLabelTwo = Labels.TEAM_RANDOM_MAP_RATING;
+    if (this.rawData[dataLabelOne] && this.rawData[dataLabelTwo]) {
+      let comboRating = Math.round(
+        Math.round(
+          Math.sqrt(
+            Math.pow(data[dataLabelOne], 2) + Math.pow(data[dataLabelTwo], 2)
+          )
+        )
+      );
+      return (this.rawData[Labels.RANDOM_MAP_COMBO_RATING] = comboRating);
     }
 
-    // Calculate team rankings
-    let copy = arrayData.slice(0);
-    copy.sort(function (a, b) {
-      if (a[RAW_TEAM_RATING] === b[RAW_TEAM_RATING]) {
-        return 0;
-      } else if (!a[RAW_TEAM_RATING]) {
-        return 1;
-      } else if (!b[RAW_TEAM_RATING]) {
-        return -1;
+    // Deathmatch combo ratings
+    dataLabelOne = Labels.DEATHMATCH_RATING;
+    dataLabelTwo = Labels.TEAM_DEATHMATCH_RATING;
+    if (this.rawData[dataLabelOne] && this.rawData[dataLabelTwo]) {
+      let comboRating = Math.round(
+        Math.round(
+          Math.sqrt(
+            Math.pow(data[dataLabelOne], 2) + Math.pow(data[dataLabelTwo], 2)
+          )
+        )
+      );
+      return (this.rawData[Labels.DEATHMATCH_COMBO_RATING] = comboRating);
+    }
+
+    // These trees allow us to calculate the percentile for any rating (without them we would only be able to calculate percentile for a player's rank)
+    // We'll just hardcode the fields we expect
+    let percentileTrees = {};
+    percentileTrees[Labels.RANDOM_MAP_RATING] = new PercentileTree(
+      this.rawData,
+      Labels.RANDOM_MAP_RATING
+    );
+    percentileTrees[Labels.TEAM_RANDOM_MAP_RATING] = new PercentileTree(
+      this.rawData,
+      Labels.TEAM_RANDOM_MAP_RATING
+    );
+    percentileTrees[Labels.COMBO_RATING] = new PercentileTree(
+      this.rawData,
+      Labels.COMBO_RATING,
+      true
+    );
+    percentileTrees[Labels.DEATHMATCH_RATING] = new PercentileTree(
+      this.rawData,
+      Labels.DEATHMATCH_RATING
+    );
+    percentileTrees[Labels.TEAM_DEATHMATCH_RATING] = new PercentileTree(
+      this.rawData,
+      Labels.TEAM_DEATHMATCH_RATING
+    );
+    percentileTrees[Labels.DEATHMATCH_COMBO_RATING] = new PercentileTree(
+      this.rawData,
+      Labels.DEATHMATCH_COMBO_RATING,
+      true
+    );
+    percentileTrees[Labels.UNRANKED_RATING] = new PercentileTree(
+      this.rawData,
+      Labels.UNRANKED_RATING,
+      true
+    );
+    this.percentileTrees = percentileTrees;
+
+    // But, we could support arbitrary fields with something like this:
+    /*
+    for (const profileId in this.rawData) {
+      for (const label in this.rawData[profileId]) {
+        percentileTrees[label] = "placeholder";
       }
-      return a[RAW_TEAM_RATING] < b[RAW_TEAM_RATING] ? 1 : -1;
-    });
-
-    for (let i = 0; i < copy.length; i++) {
-      const teamRating = copy[i][RAW_TEAM_RATING];
-      if (!copy[i][RAW_TEAM_RATING]) {
-        break;
-      }
-      const teamRank = teamRating ? i + 1 : null;
-      copy[i][RAW_TEAM_RANK] = teamRank;
     }
+    */
 
-    // Calculate combo rankings
-    copy.sort(function (a, b) {
-      if (a[RAW_COMBO_RATING] === b[RAW_COMBO_RATING]) {
-        return 0;
-      } else if (!a[RAW_COMBO_RATING]) {
-        return 1;
-      } else if (!b[RAW_COMBO_RATING]) {
-        return -1;
-      }
-      return a[RAW_COMBO_RATING] < b[RAW_COMBO_RATING] ? 1 : -1;
-    });
-
-    for (let i = 0; i < copy.length; i++) {
-      const comboRating = copy[i][RAW_COMBO_RATING];
-      if (!copy[i][RAW_COMBO_RATING]) {
-        break;
-      }
-      const comboRank = comboRating ? i + 1 : null;
-      copy[i][RAW_COMBO_RANK] = comboRank;
-    }
-
-    // Format the data as an object internally for quick lookup
-    this.data = {};
-    for (let i = 0; i < arrayData.length; i++) {
-      const profileId = arrayData[i][RAW_PROFILE_ID];
-      this.data[profileId] = arrayData[i].slice(1, arrayData[i].length);
-    }
-
-    let profileIds = Object.keys(this.data);
-
-    // Precalculate solo data
-    this.soloData = [];
-    for (let i = 0; i < profileIds.length; i++) {
-      this.soloData.push(this.getSoloRating(profileIds[i]));
-    }
-
-    // Precalculate team data
-    this.teamData = [];
-    for (let i = 0; i < profileIds.length; i++) {
-      this.teamData.push(this.getTeamRating(profileIds[i]));
-    }
-
-    // Precalculate names
-    this.names = [];
-    for (let i = 0; i < profileIds.length; i++) {
-      this.names.push(this.getName(profileIds[i]));
-    }
-
-    // Precalculate Select data
+    // Pre-produce data for ReactSelect
     this.selectData = [];
-    for (let i = 0; i < profileIds.length; i++) {
-      let profileId = profileIds[i];
+    for (const profileId in this.rawData) {
       this.selectData.push({
         value: profileId,
-        label: this.data[profileId][NAME],
+        label: this.rawData[profileId][Labels.NAME],
       });
     }
 
-    // Build rating -> percentile lookup trees
-    for (let i = 0; i < profileIds.length; i++) {
-      let teamRating = this.getTeamRating(profileIds[i]);
-      let teamPercentile = this.getTeamPercentile(profileIds[i]);
-      this.teamRatingsTree = this.teamRatingsTree.insert(
-        teamRating,
-        teamPercentile
-      );
-
-      let soloRating = this.getSoloRating(profileIds[i]);
-      let soloPercentile = this.getSoloPercentile(profileIds[i]);
-      this.soloRatingsTree = this.soloRatingsTree.insert(
-        soloRating,
-        soloPercentile
-      );
-
-      this.teamData.push();
+    // Pre-produce a list of all player names
+    this.names = [];
+    for (const profileId in this.rawData) {
+      this.names.push(this.rawData[profileId][Labels.NAME]);
     }
   }
 
-  getSelectData() {
-    return this.selectData;
+  exists(profileId) {
+    return Boolean(this.rawData[profileId]);
   }
 
-  getAllTeamRatings() {
-    return this.teamData;
-  }
-
-  getAllSoloRatings() {
-    return this.soloData;
+  getName(profileId) {
+    return this.rawData[profileId][Labels.NAME];
   }
 
   getAllNames() {
     return this.names;
   }
 
-  exists(profileId) {
-    return Boolean(this.data[profileId]);
+  getSelectData() {
+    return this.selectData;
   }
 
-  getName(profileId) {
-    return this.data[profileId][NAME];
+  getPlayerRating(type, profileId) {
+    return this.rawData[profileId][type];
   }
 
-  getSoloRating(profileId) {
-    return this.data[profileId][SOLO_RATING];
+  getPlayerPercentile(type, profileId) {
+    let rating = this.getPlayerRating(type, profileId);
+    return this.getPercentileForRating(type, rating);
   }
 
-  getSoloRank(profileId) {
-    return this.data[profileId][SOLO_RANK];
+  getRatingsArray(type) {
+    return this.percentileTrees[type].getAllNumbers();
   }
 
-  getSoloPercentile(profileId) {
-    let soloRank = this.getSoloRank(profileId);
-    if (!soloRank) {
-      return null;
+  getPercentileForRating(type, value) {
+    if (value === undefined) {
+      return undefined;
     }
-    return (this.totalSoloPlayers - (soloRank - 1)) / this.totalSoloPlayers;
-  }
-
-  getTeamRank(profileId) {
-    return this.data[profileId][TEAM_RANK];
-  }
-
-  getTeamRating(profileId) {
-    return this.data[profileId][TEAM_RATING];
-  }
-
-  getTeamPercentile(profileId) {
-    let teamRank = this.getTeamRank(profileId);
-    if (!teamRank) {
-      return null;
-    }
-    return (this.totalTeamPlayers - (teamRank - 1)) / this.totalTeamPlayers;
-  }
-
-  getComboRating(profileId) {
-    return this.data[profileId][COMBO_RATING];
-  }
-
-  getComboRank(profileId) {
-    return this.data[profileId][COMBO_RANK];
-  }
-
-  getComboPercentile(profileId) {
-    let comboRank = this.getComboRank(profileId);
-    if (!comboRank) {
-      return comboRank;
-    }
-    return (this.totalSoloPlayers - (comboRank - 1)) / this.totalSoloPlayers;
-  }
-
-  getPercentileForSoloRating(rating) {
-    return this.soloRatingsTree.le(rating).value;
-  }
-
-  getPercentileForTeamRating(rating) {
-    return this.teamRatingsTree.le(rating).value;
+    return this.percentileTrees[type].getPercentile(value);
   }
 
   formatPercentage(value) {

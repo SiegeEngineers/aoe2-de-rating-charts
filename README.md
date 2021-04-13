@@ -42,7 +42,7 @@ For example:
 
 The site is currently deployed using github pages on a custom domain.
 
-If you attempt to use github pages without a custom domain, the page will be stuck on the loading screeen and you'll see a bunch of 404 errors in the web console. To fix this you need to edit 'env-config.js' and 'next.config.js' to tell the app where it can find its assets.
+If you attempt to use github pages without a custom domain, the page will be stuck on the loading screen and you'll see a bunch of 404 errors in the web console. To fix this you need to edit 'env-config.js' and 'next.config.js' to tell the app where it can find its assets.
 
 For Example:
 **next.config.js**
@@ -50,4 +50,4 @@ replace `assetPrefix: !debug ? "" : ""` with `"process.env.BACKEND_URL": prod ? 
 **env-config.js**
 replace `assetPrefix: !debug ? "" : ""` with `assetPrefix: !debug ? "/aoe2-de-rating-charts" : ""`
 
-If you want to use a different custom domain, instead of modifying the cname file in the /docs directory, you'll need to update the cname script in 'package.json' as github action builds are invoked after every push and the docs folder, which constains the built site, is overriden.
+If you want to use a different custom domain, instead of modifying the cname file in the /docs directory, you'll need to update the cname script in 'package.json' as github action builds are invoked after every push and the docs folder, which contains the built site, is overridden.

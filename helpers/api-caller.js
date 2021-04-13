@@ -1,121 +1,112 @@
 const got = require("got");
 const fs = require("fs");
 
+import Utils from "../helpers/utils.js";
+
 const CACHE_DIRECTORY = "cache/";
 const CACHE_FILE_NAME = "ApiCache.json";
 const CACHE_EXPIRATION_IN_HOURS = 9999999; // Change this to 0 to bypass cache
 const API_CALL_CHUNK_SIZE = 1000;
 const API_CALL_DELAY_IN_MS = 2000;
 
+const LEADERBOARD_LABELS = Utils.getLeaderboardLabels();
+const INVERTED_LEADERBOARD_LABELS = Utils.invert(LEADERBOARD_LABELS);
+const ALL_LABELS = Utils.getAllLabels();
+
+/**
+ * Leaderboard ids:
+ * Unranked=0, 1v1 Deathmatch=1, Team Deathmatch=2, 1v1 Random Map=3, Team Random Map=4
+ */
 class ApiCaller {
   /**
-   * This function only gets called when the page is built. It does not become a part of the web page. The return value of this function is
-   * sent to the React component above as props.
-   *
-   * Leaderbaord ids:
-   * Unranked=0, 1v1 Deathmatch=1, Team Deathmatch=2, 1v1 Random Map=3, Team Random Map=4
+   * Accepts any number of leaderboard objects and merges them into a single leaderboard object.
    */
-  async getApiData(leaderboardIdOne, leaderboardIdTwo) {
-    try {
-      let updatedTime = 0;
+  mergePlayerData(...leaderboardData) {
+    let mergedData = {
+      timestamp: Number.MAX_VALUE,
+      data: {},
+    };
+    for (let i = 0; i < leaderboardData.length; i++) {
+      let leaderboard = leaderboardData[i];
 
-      // Get the data
-      let randomMapLeaderboardResult = await this.getLeaderboardData(
-        leaderboardIdOne
-      );
-      let teamRandomMapLeaderboardResult = await this.getLeaderboardData(
-        leaderboardIdTwo
-      );
-
-      let randomMapLeaderboard = randomMapLeaderboardResult.leaderboard;
-      let teamRandomMapLeaderbaord = teamRandomMapLeaderboardResult.leaderboard;
-      updatedTime = Math.min(
-        randomMapLeaderboardResult.updatedTime,
-        teamRandomMapLeaderboardResult.updatedTime
+      mergedData.timestamp = Math.min(
+        mergedData.timestamp,
+        leaderboard.timestamp
       );
 
-      // Format the data
-      let aoeData = {}; // {"profileId: [name, randomMapRating, teamRandomMapRating]"}
-      let xmax = 0;
-      let xmin = Number.MAX_VALUE;
-      for (let i = 0; i < randomMapLeaderboard.length; i++) {
-        let name = randomMapLeaderboard[i].name;
-        let profileId = randomMapLeaderboard[i].profile_id;
-        let soloRating = randomMapLeaderboard[i].rating;
-
-        aoeData[profileId] = [name, soloRating, null];
-
-        // Update min and max
-        if (soloRating < xmin) {
-          xmin = soloRating;
-        }
-        if (soloRating > xmax) {
-          xmax = soloRating;
-        }
-      }
-
-      console.log("TotalValid", aoeData.size);
-
-      console.log(
-        "Number of ranked random map players",
-        randomMapLeaderboard.length
-      );
-
-      for (let i = 0; i < teamRandomMapLeaderbaord.length; i++) {
-        let name = teamRandomMapLeaderbaord[i].name;
-        let profileId = teamRandomMapLeaderbaord[i].profile_id;
-        let teamRating = teamRandomMapLeaderbaord[i].rating;
-
-        if (aoeData[profileId] == undefined) {
-          aoeData[profileId] = [name, null, teamRating];
+      for (const property in leaderboard.data) {
+        if (mergedData.data[property]) {
+          mergedData.data[property] = Object.assign(
+            mergedData.data[property],
+            leaderboard.data[property]
+          );
         } else {
-          aoeData[profileId][2] = teamRating;
-        }
-        // Update min and max
-        if (teamRating < xmin) {
-          xmin = teamRating;
-        }
-        if (teamRating > xmax) {
-          xmax = teamRating;
+          mergedData.data[property] = Object.assign(
+            {},
+            leaderboard.data[property]
+          );
         }
       }
-
-      console.log(
-        "Number of ranked team random map players",
-        teamRandomMapLeaderbaord.length
-      );
-
-      let allData = [];
-      for (const property in aoeData) {
-        allData.push([property].concat(aoeData[property]));
-      }
-
-      console.log("Total number of ranked players", allData.length);
-      console.log("Doing nextjs stuff...");
-
-      // the return value will be passed to the page component as props
-      console.log(allData);
-
-      return {
-        props: {
-          // Nextjs is inexplicably slow if 'allData' is passed as an array so we'll serialize it ourselves
-          data: JSON.stringify(allData),
-          timestamp: updatedTime,
-          xmin: xmin,
-          xmax: xmax,
-        },
-      };
-    } catch (error) {
-      console.log("ERROR" + error);
-      console.log(error);
-      return {
-        props: {},
-      };
     }
+
+    return mergedData;
   }
 
+  /**
+   * Add needed derived fields and format the data for passing to the react components
+   */
+  wrapLeaderboardData(leaderboardData) {
+    let xmin = Number.MAX_VALUE;
+    let xmax = Number.MIN_VALUE;
+    let arrayData = [];
+    for (const playerId in leaderboardData.data) {
+      // Update min and max - used to show charts at the same scale
+
+      // Calculate the local min/max (at the player level)
+      let lowestRatingForPlayer = Number.MAX_VALUE;
+      let highestRatingForPlayer = Number.MIN_VALUE;
+      for (const property in leaderboardData.data[playerId]) {
+        if (INVERTED_LEADERBOARD_LABELS[property] === undefined) {
+          continue; // Not a rating (might be a 'name' for instance)
+        }
+        let rating = leaderboardData.data[playerId][property];
+        if (rating < lowestRatingForPlayer) {
+          lowestRatingForPlayer = rating;
+        }
+        if (rating > highestRatingForPlayer) {
+          highestRatingForPlayer = rating;
+        }
+      }
+
+      // Calculate global min/max (for all players)
+      if (lowestRatingForPlayer < xmin) {
+        xmin = lowestRatingForPlayer;
+      }
+      if (highestRatingForPlayer > xmax) {
+        xmax = highestRatingForPlayer;
+      }
+
+      arrayData.push([playerId]);
+    }
+
+    return {
+      props: {
+        // Nextjs is inexplicably slow if 'allData' is passed as an array so we'll serialize in and pass it as a string
+        // TODO: does this work okay now that we are passing an object instead of an array?
+        data: JSON.stringify(leaderboardData.data),
+        timestamp: leaderboardData.timestamp,
+        xmin: xmin,
+        xmax: xmax,
+      },
+    };
+  }
+
+  /**
+   * Gets the formatted data for one leaderboard
+   * @param leaderboardId
+   * @returns
+   */
   async getLeaderboardData(leaderboardId) {
-    let updatedTime = 0;
     let leaderboard = [];
     const CACHE_FILE_PATH = CACHE_DIRECTORY + leaderboardId + CACHE_FILE_NAME;
     // Get the data -- If this API call has been cached in the last CACHE_EXPIRATION_IN_HOURS hours use the cached file
@@ -137,7 +128,6 @@ class ApiCaller {
           `Using cache file to avoid API calls to aoe2.net for leaderboard ${leaderboardId}...`
         );
         leaderboard = JSON.parse(fs.readFileSync(CACHE_FILE_PATH, "utf8"));
-        updatedTime = fs.statSync(CACHE_FILE_PATH).mtimeMs;
       } else {
         console.log(
           `Fetching data from aoe2.net for leaderboard ${leaderboardId}...`
@@ -160,6 +150,7 @@ class ApiCaller {
         );
 
         // The max number of leaderboard entries we can request is 1000, so we'll do it in chunks
+        // TODO: I think it's actually 10000 now
         for (let i = 0; i < numberOfRequests; i++) {
           let startIndex = i * API_CALL_CHUNK_SIZE;
           console.log(
@@ -174,7 +165,7 @@ class ApiCaller {
           ).json();
           leaderboard = leaderboard.concat(dataResponse.leaderboard);
 
-          // Wait a litte bit between each api call. There are currently no API limits but still want to respect the server.
+          // Wait a little bit between each api call. There are currently no API limits but we still want to respect the server.
           console.log("WAITING...");
           await new Promise((r) => setTimeout(r, API_CALL_DELAY_IN_MS));
         }
@@ -185,26 +176,45 @@ class ApiCaller {
         if (!fs.existsSync(CACHE_DIRECTORY)) {
           fs.mkdirSync(CACHE_DIRECTORY);
         }
-        fs.writeFile(CACHE_FILE_PATH, JSON.stringify(leaderboard), function (
-          err
-        ) {
-          if (err) {
-            console.log("Error writing API cache file");
-            console.log(err);
-            return;
-          }
-          console.log("API responses were cached");
-        });
-        updatedTime = Math.floor(new Date());
+        fs.writeFileSync(CACHE_FILE_PATH, JSON.stringify(leaderboard));
+        console.log("API responses were cached");
       }
-      return {
-        updatedTime: updatedTime,
-        leaderboard: leaderboard,
+
+      /*
+      Format the data as a json object:
+      {
+      "timestamp" : 1234567890987,
+      "data" : {
+        "<profileId>": 
+          {
+            "<name_label>": "CrookedYams",
+            "<randomMapRating_label>": 1234,
+            "<teamRandomMapRating_label>": 5678
+            ...
+          }
+        }
+      }
+      */
+      let formattedData = {
+        timestamp: fs.statSync(CACHE_FILE_PATH).mtimeMs,
+        data: {},
       };
+      for (let i = 0; i < leaderboard.length; i++) {
+        let name = leaderboard[i].name;
+        let profileId = leaderboard[i].profile_id;
+        let rating = leaderboard[i].rating;
+        let leaderboardLabel = LEADERBOARD_LABELS[leaderboardId];
+
+        formattedData.data[profileId] = {};
+        formattedData.data[profileId][ALL_LABELS.NAME] = name;
+        formattedData.data[profileId][leaderboardLabel] = rating;
+      }
+
+      return formattedData;
     } catch (e) {
       // If something fails here the page still builds
       // We don't want Github Actions to build and deploy a site that didn't build properly (e.g. API requests fail)
-      // So, we'll do a hard exit here with a failure code.
+      // So, we'll do a hard exit here with a failure code of 1.
       console.log("Something went wrong during the build", e);
       process.exit(1);
     }

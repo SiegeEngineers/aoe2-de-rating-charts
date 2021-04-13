@@ -1,14 +1,17 @@
 import React from "react";
 import styles from "./team-table.module.css";
+import Utils from "../helpers/utils.js";
+
+const Labels = Utils.getAllLabels();
 
 class TeamTable extends React.Component {
   state = {};
 
-  calculateAverage(data, acessorFunction, profileIds) {
+  calculateAverage(data, accessorFunction, dataLabel, profileIds) {
     let count = 0;
     let sum = 0;
     for (let i = 0; i < profileIds.length; i++) {
-      let result = acessorFunction.call(data, profileIds[i]);
+      let result = accessorFunction.call(data, dataLabel, profileIds[i]);
       if (result) {
         sum += result;
         count++;
@@ -30,7 +33,7 @@ class TeamTable extends React.Component {
 
   render() {
     const data = this.props.data;
-    const players = this.props.players.filter(profileId =>
+    const players = this.props.players.filter((profileId) =>
       data.exists(profileId)
     );
     const color = this.props.color;
@@ -45,15 +48,33 @@ class TeamTable extends React.Component {
 
     for (let i = 0; i < players.length; i++) {
       let profileId = players[i];
-      let name = data.getName(profileId);
-      let randomMapRating = data.getSoloRating(profileId);
-      let randomMapPercentile = data.getSoloPercentile(profileId);
-      let teamRandomMapRating = data.getTeamRating(profileId);
-      let teamRandomMapPercentile = data.getTeamPercentile(profileId);
-      let euclideanRating = data.getComboRating(profileId);
-      let euclideanPercentile = data.getComboPercentile(profileId);
+      let name = data.getPlayerRating(Labels.NAME, profileId);
+      let randomMapRating = data.getPlayerRating(
+        this.props.dataLabelOne,
+        profileId
+      );
+      let randomMapPercentile = data.getPlayerPercentile(
+        this.props.dataLabelOne,
+        profileId
+      );
+      let teamRandomMapRating = data.getPlayerRating(
+        this.props.dataLabelTwo,
+        profileId
+      );
+      let teamRandomMapPercentile = data.getPlayerPercentile(
+        this.props.dataLabelTwo,
+        profileId
+      );
+      let euclideanRating = data.getPlayerRating(
+        this.props.dataLabelThree,
+        profileId
+      );
+      let euclideanPercentile = data.getPlayerPercentile(
+        this.props.dataLabelThree,
+        profileId
+      );
       items.push(
-        <tr>
+        <tr key={"player-" + profileId}>
           <th width="28%">{name}</th>
           <th width="12%" style={{ borderLeft: "1px solid " + color }}>
             {randomMapRating}
@@ -75,32 +96,38 @@ class TeamTable extends React.Component {
     if (players.length > 1) {
       let soloRatingAvg = this.calculateAverage(
         data,
-        data.getSoloRating,
+        data.getPlayerRating,
+        this.props.dataLabelOne,
         players
       );
       let soloPercentageAvg = this.calculateAverage(
         data,
-        data.getSoloPercentile,
+        data.getPlayerPercentile,
+        this.props.dataLabelOne,
         players
       );
       let teamRatingAvg = this.calculateAverage(
         data,
-        data.getTeamRating,
+        data.getPlayerRating,
+        this.props.dataLabelTwo,
         players
       );
       let teamPercentageAvg = this.calculateAverage(
         data,
-        data.getTeamPercentile,
+        data.getPlayerPercentile,
+        this.props.dataLabelTwo,
         players
       );
       let comboRankingAvg = this.calculateAverage(
         data,
-        data.getComboRating,
+        data.getPlayerRating,
+        this.props.dataLabelThree,
         players
       );
       let comboPercentageAvg = this.calculateAverage(
         data,
-        data.getComboPercentile,
+        data.getPlayerPercentile,
+        this.props.dataLabelThree,
         players
       );
 
@@ -150,10 +177,10 @@ class TeamTable extends React.Component {
             borderSpacing: "0px",
             fontSize: "12px",
             borderCollapse: "collapse",
-            tableLayout: "fixed"
+            tableLayout: "fixed",
           }}
         >
-          {items}
+          <tbody>{items}</tbody>
         </table>
       </div>
     );

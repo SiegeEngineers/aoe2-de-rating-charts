@@ -1,7 +1,6 @@
-// worker.js
 self.addEventListener(
   "message",
-  function(message) {
+  function (message) {
     let data = message.data;
     let needle = data.query;
     let haystack = data.data;
@@ -23,20 +22,19 @@ self.addEventListener(
         !blacklist.includes(haystack[i].value)
       ) {
         candidates.push(haystack[i]);
-      }
-      if (candidates.length >= maxCandidates) {
-        break;
+        haystack[i].levenstein = levenstein(candidateString, needle);
       }
     }
+    candidates.sort((a, b) => (a.levenstein > b.levenstein ? 1 : -1));
+    candidates.forEach((v) => delete v.levenstein);
+    self.postMessage(candidates.slice(0, maxCandidates));
     var t1 = performance.now();
     console.log("Webworker query took " + (t1 - t0) + " milliseconds.");
-    self.postMessage(candidates);
   },
   false
 );
 
 function simplifyString(input) {
-  // To lower case
   input = input.toLowerCase();
 
   // Remove accents
@@ -44,4 +42,32 @@ function simplifyString(input) {
   input = input.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
   return input;
+}
+
+function levenstein(sA, sB) {
+  var a = sA,
+    b = sB + "",
+    m = [],
+    i,
+    j,
+    min = Math.min;
+
+  if (!(a && b)) return (b || a).length;
+
+  for (i = 0; i <= b.length; m[i] = [i++]);
+  for (j = 0; j <= a.length; m[0][j] = j++);
+
+  for (i = 1; i <= b.length; i++) {
+    for (j = 1; j <= a.length; j++) {
+      m[i][j] =
+        b.charAt(i - 1) == a.charAt(j - 1)
+          ? m[i - 1][j - 1]
+          : (m[i][j] = min(
+              m[i - 1][j - 1] + 1,
+              min(m[i][j - 1] + 1, m[i - 1][j] + 1)
+            ));
+    }
+  }
+
+  return m[b.length][a.length];
 }
