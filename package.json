@@ -11,6 +11,7 @@
     "cname": "echo ratings.aoe2.se > ./docs/CNAME",
     "start": "next start",
     "pages": "next build & next export -o docs & touch ./docs/.nojekyll",
+    "copy-ratings": "cp -rf ./ratings-ignored/. ./ratings/",
     "test": "echo 'no tests :('"
   },
   "repository": {

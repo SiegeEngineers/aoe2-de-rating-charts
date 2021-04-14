@@ -36,13 +36,17 @@ export async function getStaticProps(context) {
   let apiCaller = new ApiCaller();
 
   // Generate data for the public directory
+  if (!fs.existsSync("ratings-ignored")) {
+    fs.mkdirSync("ratings-ignored");
+  }
+
   fs.writeFileSync(
-    "public/leaderboard3.json",
+    "ratings-ignored/leaderboard3.json",
     JSON.stringify(await apiCaller.getLeaderboardData(3))
   );
 
   fs.writeFileSync(
-    "public/leaderboard4.json",
+    "ratings-ignored/leaderboard4.json",
     JSON.stringify(await apiCaller.getLeaderboardData(4))
   );
 

@@ -23,6 +23,7 @@ jobs:
           npm run export
           npm run nojekyll
           npm run cname
+          npm run copy-ratings
       - name: Commit files
         run: |
           git config --local user.email ${{ secrets.ACTION_BUILD_EMAIL }}
