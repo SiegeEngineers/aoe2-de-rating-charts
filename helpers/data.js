@@ -50,6 +50,20 @@ class Data {
       return (this.rawData[Labels.DEATHMATCH_COMBO_RATING] = comboRating);
     }
 
+    // RandomMap combo ratings
+    dataLabelOne = Labels.EMPIRE_WARS_RATING;
+    dataLabelTwo = Labels.EMPIRE_WARS_TEAM_RATING;
+    if (this.rawData[dataLabelOne] && this.rawData[dataLabelTwo]) {
+      let comboRating = Math.round(
+        Math.round(
+          Math.sqrt(
+            Math.pow(data[dataLabelOne], 2) + Math.pow(data[dataLabelTwo], 2)
+          )
+        )
+      );
+      return (this.rawData[Labels.EMPIRE_WARS_COMBO_RATING] = comboRating);
+    }
+
     // These trees allow us to calculate the percentile for any rating (without them we would only be able to calculate percentile for a player's rank)
     // We'll just hardcode the fields we expect
     let percentileTrees = {};
@@ -82,6 +96,19 @@ class Data {
     percentileTrees[Labels.UNRANKED_RATING] = new PercentileTree(
       this.rawData,
       Labels.UNRANKED_RATING,
+      true
+    );
+    percentileTrees[Labels.EMPIRE_WARS_RATING] = new PercentileTree(
+      this.rawData,
+      Labels.EMPIRE_WARS_RATING
+    );
+    percentileTrees[Labels.EMPIRE_WARS_TEAM_RATING] = new PercentileTree(
+      this.rawData,
+      Labels.EMPIRE_WARS_TEAM_RATING
+    );
+    percentileTrees[Labels.EMPIRE_WARS_COMBO_RATING] = new PercentileTree(
+      this.rawData,
+      Labels.EMPIRE_WARS_COMBO_RATING,
       true
     );
     this.percentileTrees = percentileTrees;

@@ -23,9 +23,9 @@
   "dependencies": {
     "functional-red-black-tree": "^1.0.1",
     "got": "^10.6.0",
-    "next": "^10.0.8",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
+    "next": "^11.0.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "react-select": "^3.1.0"
   }
 }

@@ -3,7 +3,8 @@
 Live at: https://ratings.aoe2.se/
 
 Random Map: https://ratings.aoe2.se
-Deathmatch: https://ratings.aoe2.se/deathmatch
+Empire Wars: https://ratings.aoe2.se/empire-wars
+DEFUNCT: Deathmatch: https://ratings.aoe2.se/deathmatch
 
 Stats are updated automatically, every day via github actions.
 
