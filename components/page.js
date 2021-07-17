@@ -28,7 +28,7 @@ TODO:
 4) Variable names...
 13) Select box turns blue when selected instead of team color
 14) Color chips in select box
-16) Remove 'random map' ids from this component now that it displays deathmatch as well
+16) Remove 'random map' ids from this component now that it displays empire-wars as well
 */
 
 export default class extends Component {
@@ -893,9 +893,8 @@ function addTextAttributeToTrace(chartElement, dataset, type) {
 
 function parseQueryString(queryString) {
   var query = {};
-  var pairs = (queryString[0] === "?"
-    ? queryString.substr(1)
-    : queryString
+  var pairs = (
+    queryString[0] === "?" ? queryString.substr(1) : queryString
   ).split("&");
   for (var i = 0; i < pairs.length; i++) {
     var pair = pairs[i].split("=");

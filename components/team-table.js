@@ -73,6 +73,7 @@ class TeamTable extends React.Component {
         this.props.dataLabelThree,
         profileId
       );
+
       items.push(
         <tr key={"player-" + profileId}>
           <th width="28%">{name}</th>

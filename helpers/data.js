@@ -21,47 +21,60 @@ class Data {
     }
 
     // Add derived properties to the rawData
-
-    // Random map combo ratings
-    let dataLabelOne = Labels.RANDOM_MAP_RATING;
-    let dataLabelTwo = Labels.TEAM_RANDOM_MAP_RATING;
-    if (this.rawData[dataLabelOne] && this.rawData[dataLabelTwo]) {
-      let comboRating = Math.round(
-        Math.round(
-          Math.sqrt(
-            Math.pow(data[dataLabelOne], 2) + Math.pow(data[dataLabelTwo], 2)
+    for (const profileId in this.rawData) {
+      // Random map combo ratings
+      let dataLabelOne = Labels.RANDOM_MAP_RATING;
+      let dataLabelTwo = Labels.TEAM_RANDOM_MAP_RATING;
+      if (
+        this.rawData[profileId][dataLabelOne] &&
+        this.rawData[profileId][dataLabelTwo]
+      ) {
+        let comboRating = Math.round(
+          Math.round(
+            Math.sqrt(
+              Math.pow(this.rawData[profileId][dataLabelOne], 2) +
+                Math.pow(this.rawData[profileId][dataLabelTwo], 2)
+            )
           )
-        )
-      );
-      return (this.rawData[Labels.RANDOM_MAP_COMBO_RATING] = comboRating);
-    }
+        );
+        this.rawData[profileId][Labels.RANDOM_MAP_COMBO_RATING] = comboRating;
+      }
 
-    // Deathmatch combo ratings
-    dataLabelOne = Labels.DEATHMATCH_RATING;
-    dataLabelTwo = Labels.TEAM_DEATHMATCH_RATING;
-    if (this.rawData[dataLabelOne] && this.rawData[dataLabelTwo]) {
-      let comboRating = Math.round(
-        Math.round(
-          Math.sqrt(
-            Math.pow(data[dataLabelOne], 2) + Math.pow(data[dataLabelTwo], 2)
+      // Deathmatch combo ratings
+      dataLabelOne = Labels.DEATHMATCH_RATING;
+      dataLabelTwo = Labels.TEAM_DEATHMATCH_RATING;
+      if (
+        this.rawData[profileId][dataLabelOne] &&
+        this.rawData[profileId][dataLabelTwo]
+      ) {
+        let comboRating = Math.round(
+          Math.round(
+            Math.sqrt(
+              Math.pow(this.rawData[profileId][dataLabelOne], 2) +
+                Math.pow(this.rawData[profileId][dataLabelTwo], 2)
+            )
           )
-        )
-      );
-      return (this.rawData[Labels.DEATHMATCH_COMBO_RATING] = comboRating);
-    }
+        );
+        this.rawData[profileId][Labels.DEATHMATCH_COMBO_RATING] = comboRating;
+      }
 
-    // RandomMap combo ratings
-    dataLabelOne = Labels.EMPIRE_WARS_RATING;
-    dataLabelTwo = Labels.EMPIRE_WARS_TEAM_RATING;
-    if (this.rawData[dataLabelOne] && this.rawData[dataLabelTwo]) {
-      let comboRating = Math.round(
-        Math.round(
-          Math.sqrt(
-            Math.pow(data[dataLabelOne], 2) + Math.pow(data[dataLabelTwo], 2)
+      // Empire Wars combo ratings
+      dataLabelOne = Labels.EMPIRE_WARS_RATING;
+      dataLabelTwo = Labels.EMPIRE_WARS_TEAM_RATING;
+      if (
+        this.rawData[profileId][dataLabelOne] &&
+        this.rawData[profileId][dataLabelTwo]
+      ) {
+        let comboRating = Math.round(
+          Math.round(
+            Math.sqrt(
+              Math.pow(this.rawData[profileId][dataLabelOne], 2) +
+                Math.pow(this.rawData[profileId][dataLabelTwo], 2)
+            )
           )
-        )
-      );
-      return (this.rawData[Labels.EMPIRE_WARS_COMBO_RATING] = comboRating);
+        );
+        this.rawData[profileId][Labels.EMPIRE_WARS_COMBO_RATING] = comboRating;
+      }
     }
 
     // These trees allow us to calculate the percentile for any rating (without them we would only be able to calculate percentile for a player's rank)
@@ -75,9 +88,9 @@ class Data {
       this.rawData,
       Labels.TEAM_RANDOM_MAP_RATING
     );
-    percentileTrees[Labels.COMBO_RATING] = new PercentileTree(
+    percentileTrees[Labels.RANDOM_MAP_COMBO_RATING] = new PercentileTree(
       this.rawData,
-      Labels.COMBO_RATING,
+      Labels.RANDOM_MAP_COMBO_RATING,
       true
     );
     percentileTrees[Labels.DEATHMATCH_RATING] = new PercentileTree(
