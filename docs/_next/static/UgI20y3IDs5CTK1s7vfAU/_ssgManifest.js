@@ -1,1 +1,0 @@
-self.__SSG_MANIFEST=new Set(["\u002Fembed","\u002Fdeathmatch","\u002Fempire-wars","\u002F"]);self.__SSG_MANIFEST_CB&&self.__SSG_MANIFEST_CB()
