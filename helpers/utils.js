@@ -16,8 +16,8 @@ class Utils {
    * Swaps keys and values on a json object
    */
   static invert(json) {
-    var ret = {};
-    for (var key in json) {
+    let ret = {};
+    for (let key in json) {
       ret[json[key]] = key;
     }
     return ret;
@@ -49,6 +49,35 @@ class Utils {
       EMPIRE_WARS_TEAM_RATING: EMPIRE_WARS_TEAM_RATING,
       EMPIRE_WARS_COMBO_RATING: EMPIRE_WARS_COMBO_RATING,
     });
+  }
+
+  static linearRegression(y, x) {
+    var lr = {};
+    var n = y.length;
+    var sum_x = 0;
+    var sum_y = 0;
+    var sum_xy = 0;
+    var sum_xx = 0;
+    var sum_yy = 0;
+
+    for (var i = 0; i < y.length; i++) {
+      sum_x += x[i];
+      sum_y += y[i];
+      sum_xy += x[i] * y[i];
+      sum_xx += x[i] * x[i];
+      sum_yy += y[i] * y[i];
+    }
+    console.log(sum_x, sum_y, sum_xy, sum_xx, sum_yy);
+
+    lr["slope"] = (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x * sum_x);
+    lr["intercept"] = (sum_y - lr.slope * sum_x) / n;
+    lr["r2"] = Math.pow(
+      (n * sum_xy - sum_x * sum_y) /
+        Math.sqrt((n * sum_xx - sum_x * sum_x) * (n * sum_yy - sum_y * sum_y)),
+      2
+    );
+
+    return lr;
   }
 }
 

@@ -5,10 +5,12 @@ import TeamTable from "./team-table.js";
 import Data from "../helpers/data.js";
 import AnnotationSeparator from "../helpers/annotation-separator.js";
 import styles from "./page.module.css";
+import Utils from "../helpers/utils.js";
 
 const DEFAULT_COLOR = "#0eac22"; // green
 const TEAM_ONE_COLOR = "#6311a5"; // purple
 const TEAM_TWO_COLOR = "#fe9918"; // orange
+const BLACK = "#000000"; // black
 
 // Common chart variables
 const AXIS_FONT_SIZE = 14;
@@ -25,7 +27,7 @@ const MARGINS = {
 /*
 TODO:
 3) What if multiple players on different teams map to the same bucket?
-4) Variable names...
+4) variable names...
 13) Select box turns blue when selected instead of team color
 14) Color chips in select box
 16) Remove 'random map' ids from this component now that it displays empire-wars as well
@@ -43,12 +45,11 @@ export default class extends Component {
     let dataSet = new Data(this.props.data);
     let histogramArray = []; // JSON.parse(this.props.histogram);
     let timestamp = this.props.timestamp ? this.props.timestamp : 0;
-    let xmin = this.props.xmin; // TODO: remove the 'x' there are just absolute max and min values
+    let xmin = this.props.xmin;
     let xmax = this.props.xmax;
 
     // Random Map Histogram
-
-    var trace = {
+    let traceRandomMap = {
       x: dataSet.getRatingsArray(this.props.dataLabelOne),
       type: "histogram",
       marker: {
@@ -64,7 +65,7 @@ export default class extends Component {
       hovermode: "x unified",
       hoveron: "points+fills",
     };
-    var layout = {
+    let layoutRandomMap = {
       title: {
         text: this.props.chartOneLabel,
         font: {
@@ -84,7 +85,11 @@ export default class extends Component {
             color: AXIS_FONT_COLOR,
           },
         },
-        range: [xmin, xmax],
+        range: [
+          // TODO: this can be done in one pass
+          Math.min(...dataSet.getRatingsArray(this.props.dataLabelOne)),
+          Math.min(...dataSet.getRatingsArray(this.props.dataLabelOne)),
+        ],
         fixedrange: true,
       },
       yaxis: {
@@ -101,20 +106,25 @@ export default class extends Component {
       marker: { color: DEFAULT_COLOR },
       hovermode: "false",
     };
-    var data = [trace];
-    let randomMapPlot = Plotly.newPlot("random_map_histogram", data, layout, {
-      scrollZoom: false,
-      responsive: true,
-      showLink: true,
-      plotlyServerURL: "https://chart-studio.plotly.com",
-    });
+    let dataRandomMap = [traceRandomMap];
+    let randomMapPlot = Plotly.newPlot(
+      "random_map_histogram",
+      dataRandomMap,
+      layoutRandomMap,
+      {
+        scrollZoom: false,
+        responsive: true,
+        showLink: true,
+        plotlyServerURL: "https://chart-studio.plotly.com",
+      }
+    );
 
     // Team Random Map Histogram
-    var teamRandomMapScores = [];
-    for (var i = 0; i < histogramArray.length; i++) {
+    let teamRandomMapScores = [];
+    for (let i = 0; i < histogramArray.length; i++) {
       teamRandomMapScores[i] = histogramArray[i][2];
     }
-    var trace = {
+    let traceTeamRandomMap = {
       x: dataSet.getRatingsArray(this.props.dataLabelTwo),
       type: "histogram",
       marker: {
@@ -123,7 +133,7 @@ export default class extends Component {
       hovertemplate:
         "# of Players: %{y}<br>Rating Range: %{x}<br>Percentile: %{text}<extra></extra>",
     };
-    var layout = {
+    let layoutTeamRandomMap = {
       title: {
         text: this.props.chartTwoLabel,
         font: {
@@ -143,7 +153,11 @@ export default class extends Component {
             color: AXIS_FONT_COLOR,
           },
         },
-        range: [xmin, xmax],
+        range: [
+          // TODO: this can be done in one pass
+          Math.min(...dataSet.getRatingsArray(this.props.dataLabelTwo)),
+          Math.min(...dataSet.getRatingsArray(this.props.dataLabelTwo)),
+        ],
         fixedrange: true,
       },
       yaxis: {
@@ -158,11 +172,11 @@ export default class extends Component {
         fixedrange: true,
       },
     };
-    var data = [trace];
+    let dataTeamRandomMap = [traceTeamRandomMap];
     let teamRandomMapPlot = Plotly.newPlot(
       "team_random_map_histogram",
-      data,
-      layout,
+      dataTeamRandomMap,
+      layoutTeamRandomMap,
       {
         scrollZoom: false,
         responsive: true,
@@ -191,7 +205,7 @@ export default class extends Component {
     }
 
     // Combo Scatterplot
-    var trace1 = {
+    let trace1 = {
       x: filteredX,
       y: filteredY,
       text: filteredNames,
@@ -205,9 +219,20 @@ export default class extends Component {
       hovertemplate: "Name: %{text}<br>Team: %{y}<br>1v1: %{x}<extra></extra>",
     };
 
-    var data = [trace1];
+    // Add trendline
+    let scatterXMin = Math.min(...filteredX);
+    let scatterXMax = Math.max(...filteredX);
 
-    var layout = {
+    let trace2 = getTrendlineTrace(
+      filteredX,
+      filteredY,
+      scatterXMin,
+      scatterXMax
+    );
+
+    let dataScatter = [trace2, trace1];
+
+    let layoutScatter = {
       hovermode: "closest",
       showlegend: false,
       title: {
@@ -229,7 +254,7 @@ export default class extends Component {
             color: AXIS_FONT_COLOR,
           },
         },
-        range: [xmin, xmax],
+        range: [scatterXMin, scatterXMax],
         fixedrange: true,
       },
       yaxis: {
@@ -245,12 +270,17 @@ export default class extends Component {
       },
     };
 
-    let scatterPlot = Plotly.newPlot("combo_scatterplot", data, layout, {
-      scrollZoom: false,
-      responsive: true,
-      showLink: true,
-      plotlyServerURL: "https://chart-studio.plotly.com",
-    });
+    let scatterPlot = Plotly.newPlot(
+      "combo_scatterplot",
+      dataScatter,
+      layoutScatter,
+      {
+        scrollZoom: false,
+        responsive: true,
+        showLink: true,
+        plotlyServerURL: "https://chart-studio.plotly.com",
+      }
+    );
 
     let lastUpdatedDiv = document.getElementById("last_updated");
     let date = new Date(timestamp);
@@ -302,7 +332,7 @@ export default class extends Component {
           true
         );
 
-        // Now that the plots have been rendered, we know the characteristics of the bins (count, range, ratings) so we can add the text lables
+        // Now that the plots have been rendered, we know the characteristics of the bins (count, range, ratings) so we can add the text labels
         addTextAttributeToTrace(
           this.randomMapDiv,
           dataSet,
@@ -685,7 +715,7 @@ function highlightHistogramMarker(chartElement, values) {
   // Filter out any values that are undefined
   values = values.filter((value) => value.value);
 
-  // Get the unique colors, assign each color a number begining with 0 and counting by ones
+  // Get the unique colors, assign each color a number beginning with 0 and counting by ones
   let counter = 1;
   let colors = {};
   for (let i = 0; i < values.length; i++) {
@@ -810,14 +840,14 @@ function highlightScatterplotMarker(chartElement, values) {
   }
 
   // Remove any existing highlight traces if they exists
-  while (chartElement.data.length >= 2) {
-    Plotly.deleteTraces(chartElement, 1);
+  while (chartElement.data.length >= 3) {
+    Plotly.deleteTraces(chartElement, 2);
   }
 
   // Add a new traces with our highlighted points
   let newTraces = [];
   for (const prop in colors) {
-    var trace = {
+    let trace = {
       x: colors[prop].x,
       y: colors[prop].y,
       mode: "markers",
@@ -891,13 +921,35 @@ function addTextAttributeToTrace(chartElement, dataset, type) {
   Plotly.update(chartElement, textUpdate);
 }
 
+function getTrendlineTrace(x_data, y_data, xmin, xmax) {
+  let lr = Utils.linearRegression(y_data, x_data);
+
+  let fit_from = xmin;
+  let fit_to = xmax;
+
+  let fit = {
+    y: [fit_from * lr.slope + lr.intercept, fit_to * lr.slope + lr.intercept],
+    x: [fit_from, fit_to],
+    mode: "lines",
+    type: "scattergl",
+    name: `R2=${lr.r2.toFixed(3)}`,
+    hovertemplate: `y=${lr.slope.toFixed(3)}*x+${lr.intercept.toFixed(3)}`,
+    line: {
+      width: 0.5,
+      color: BLACK,
+      opacity: 0.5,
+    },
+  };
+  return fit;
+}
+
 function parseQueryString(queryString) {
-  var query = {};
-  var pairs = (
+  let query = {};
+  let pairs = (
     queryString[0] === "?" ? queryString.substr(1) : queryString
   ).split("&");
-  for (var i = 0; i < pairs.length; i++) {
-    var pair = pairs[i].split("=");
+  for (let i = 0; i < pairs.length; i++) {
+    let pair = pairs[i].split("=");
     query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || "");
   }
   return query;
