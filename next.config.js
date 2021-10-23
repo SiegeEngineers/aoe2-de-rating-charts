@@ -18,4 +18,7 @@ module.exports = {
     // Important: return the modified config
     return config;
   },
+  experimental: {
+    staticPageGenerationTimeout: 600, // 10 minutes
+  },
 };
