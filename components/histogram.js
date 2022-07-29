@@ -319,7 +319,7 @@ function highlightHistogramMarker(chartElement, values) {
     }
   }
 
-  let seperator = new AnnotationSeparator(
+  let separator = new AnnotationSeparator(
     annotations,
     chartElement.layout.xaxis.range[0],
     chartElement.layout.xaxis.range[1],
@@ -327,7 +327,7 @@ function highlightHistogramMarker(chartElement, values) {
     chartElement.layout.yaxis.range[1]
   );
   let layoutUpdate = {
-    annotations: seperator.getSeparatedAnnotations(),
+    annotations: separator.getSeparatedAnnotations(),
   };
 
   // Update the plot with the highlights and annotations
@@ -358,9 +358,8 @@ function addTextAttributeToTrace(chartElement, dataset, type) {
 
 function parseQueryString(queryString) {
   var query = {};
-  var pairs = (queryString[0] === "?"
-    ? queryString.substr(1)
-    : queryString
+  var pairs = (
+    queryString[0] === "?" ? queryString.substr(1) : queryString
   ).split("&");
   for (var i = 0; i < pairs.length; i++) {
     var pair = pairs[i].split("=");

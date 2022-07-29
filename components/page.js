@@ -49,11 +49,17 @@ export default class extends Component {
     const elos = dataSet.getRatingsArray(this.props.dataLabelOne);
     const teamElos = dataSet.getRatingsArray(this.props.dataLabelTwo);
 
-    // Share xmin and xmas for all 3 graphs
-    const xmin = Math.min(...[...elos, ...teamElos].filter(Boolean)).clamp(0, Infinity);
-    const xmax = Math.max(...[...elos, ...teamElos].filter(Boolean)).clamp(0, Infinity);
+    // Share xmin and xmax for all 3 graphs
+    const xmin = Math.min(...[...elos, ...teamElos].filter(Boolean)).clamp(
+      0,
+      Infinity
+    );
+    const xmax = Math.max(...[...elos, ...teamElos].filter(Boolean)).clamp(
+      0,
+      Infinity
+    );
 
-    const xbins = {start: 0, end: 3500,size: 10}; // each bin covers 10 elo points
+    const xbins = { start: 0, end: 3500, size: 10 }; // each bin covers 10 elo points
     const soloPopSize = elos.filter(Boolean).length;
 
     // Random Map Histogram
@@ -113,7 +119,7 @@ export default class extends Component {
       },
       marker: { color: DEFAULT_COLOR },
       hovermode: "false",
-      legend: {x: 1, y: 1, xanchor: 'right'},
+      legend: { x: 1, y: 1, xanchor: "right" },
     };
     let dataRandomMap = [traceRandomMap];
     let randomMapPlot = Plotly.newPlot(
@@ -181,7 +187,7 @@ export default class extends Component {
         },
         fixedrange: true,
       },
-      legend: {x: 1, y: 1, xanchor: 'right'},
+      legend: { x: 1, y: 1, xanchor: "right" },
     };
     let dataTeamRandomMap = [traceTeamRandomMap];
     let teamRandomMapPlot = Plotly.newPlot(
@@ -203,11 +209,7 @@ export default class extends Component {
     let filteredNames = [];
     let filteredX = [];
     let filteredY = [];
-    for (
-      let i = 0;
-      i < elos.length;
-      i++
-    ) {
+    for (let i = 0; i < elos.length; i++) {
       if (fullX[i] !== undefined && fullY[i] !== undefined) {
         filteredNames.push(fullNames[i]);
         filteredX.push(fullX[i]);
@@ -795,6 +797,11 @@ function highlightHistogramMarker(chartElement, values) {
   let annotations = [];
   for (let i = 0; i < values.length; i++) {
     if (values[i].value) {
+      // Don't show anything if there is no bucket because this player's rating is outside of the chart's range
+      if (chartElement.calcdata[0][values[i].bucketIndex] === undefined) {
+        console.log("Skipping player outside of histogram range");
+        continue;
+      }
       let entry = {
         text: values[i].name,
         x: values[i].value,
@@ -815,7 +822,7 @@ function highlightHistogramMarker(chartElement, values) {
     }
   }
 
-  let seperator = new AnnotationSeparator(
+  let separator = new AnnotationSeparator(
     annotations,
     chartElement.layout.xaxis.range[0],
     chartElement.layout.xaxis.range[1],
@@ -823,7 +830,7 @@ function highlightHistogramMarker(chartElement, values) {
     chartElement.layout.yaxis.range[1]
   );
   let layoutUpdate = {
-    annotations: seperator.getSeparatedAnnotations(),
+    annotations: separator.getSeparatedAnnotations(),
   };
 
   // Update the plot with the highlights and annotations
@@ -897,7 +904,7 @@ function highlightScatterplotMarker(chartElement, values) {
       annotations.push(entry);
     }
   }
-  let seperator = new AnnotationSeparator(
+  let separator = new AnnotationSeparator(
     annotations,
     chartElement.layout.xaxis.range[0],
     chartElement.layout.xaxis.range[1],
@@ -905,7 +912,7 @@ function highlightScatterplotMarker(chartElement, values) {
     chartElement.layout.yaxis.range[1]
   );
   let update = {
-    annotations: seperator.getSeparatedAnnotations(),
+    annotations: separator.getSeparatedAnnotations(),
   };
 
   // Refresh the plot to apply the changes
