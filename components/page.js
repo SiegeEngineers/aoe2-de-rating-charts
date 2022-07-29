@@ -45,12 +45,20 @@ export default class extends Component {
     let dataSet = new Data(this.props.data);
     let histogramArray = []; // JSON.parse(this.props.histogram);
     let timestamp = this.props.timestamp ? this.props.timestamp : 0;
-    let xmin = this.props.xmin;
-    let xmax = this.props.xmax;
+
+    const elos = dataSet.getRatingsArray(this.props.dataLabelOne);
+    const teamElos = dataSet.getRatingsArray(this.props.dataLabelTwo);
+
+    // Share xmin and xmas for all 3 graphs
+    const xmin = Math.min(...[...elos, ...teamElos].filter(Boolean)).clamp(0, Infinity);
+    const xmax = Math.max(...[...elos, ...teamElos].filter(Boolean)).clamp(0, Infinity);
+
+    const xbins = {start: 0, end: 3500,size: 10}; // each bin covers 10 elo points
+    const soloPopSize = elos.filter(Boolean).length;
 
     // Random Map Histogram
     let traceRandomMap = {
-      x: dataSet.getRatingsArray(this.props.dataLabelOne),
+      x: elos,
       type: "histogram",
       marker: {
         color: DEFAULT_COLOR,
@@ -62,6 +70,10 @@ export default class extends Component {
           color: "red",
         },
       },
+      showlegend: true,
+      name: `N = ${soloPopSize.toLocaleString()}`,
+      autobinx: soloPopSize < 1000, // Deathmatch lacks enough samples to let manual binning look good
+      xbins,
       hovermode: "x unified",
       hoveron: "points+fills",
     };
@@ -85,11 +97,7 @@ export default class extends Component {
             color: AXIS_FONT_COLOR,
           },
         },
-        range: [
-          // TODO: this can be done in one pass
-          Math.min(...dataSet.getRatingsArray(this.props.dataLabelOne)),
-          Math.min(...dataSet.getRatingsArray(this.props.dataLabelOne)),
-        ],
+        range: [xmin, xmax],
         fixedrange: true,
       },
       yaxis: {
@@ -105,6 +113,7 @@ export default class extends Component {
       },
       marker: { color: DEFAULT_COLOR },
       hovermode: "false",
+      legend: {x: 1, y: 1, xanchor: 'right'},
     };
     let dataRandomMap = [traceRandomMap];
     let randomMapPlot = Plotly.newPlot(
@@ -124,12 +133,17 @@ export default class extends Component {
     for (let i = 0; i < histogramArray.length; i++) {
       teamRandomMapScores[i] = histogramArray[i][2];
     }
+    const teamPopSize = teamElos.filter(Boolean).length;
     let traceTeamRandomMap = {
-      x: dataSet.getRatingsArray(this.props.dataLabelTwo),
+      x: teamElos,
       type: "histogram",
       marker: {
         color: DEFAULT_COLOR,
       },
+      showlegend: true,
+      name: `N = ${teamPopSize.toLocaleString()}`,
+      autobinx: teamPopSize < 1000,
+      xbins,
       hovertemplate:
         "# of Players: %{y}<br>Rating Range: %{x}<br>Percentile: %{text}<extra></extra>",
     };
@@ -153,11 +167,7 @@ export default class extends Component {
             color: AXIS_FONT_COLOR,
           },
         },
-        range: [
-          // TODO: this can be done in one pass
-          Math.min(...dataSet.getRatingsArray(this.props.dataLabelTwo)),
-          Math.min(...dataSet.getRatingsArray(this.props.dataLabelTwo)),
-        ],
+        range: [xmin, xmax],
         fixedrange: true,
       },
       yaxis: {
@@ -171,6 +181,7 @@ export default class extends Component {
         },
         fixedrange: true,
       },
+      legend: {x: 1, y: 1, xanchor: 'right'},
     };
     let dataTeamRandomMap = [traceTeamRandomMap];
     let teamRandomMapPlot = Plotly.newPlot(
@@ -187,14 +198,14 @@ export default class extends Component {
 
     // TODO: move this into data?
     let fullNames = dataSet.getAllNames();
-    let fullX = dataSet.getRatingsArray(this.props.dataLabelOne);
-    let fullY = dataSet.getRatingsArray(this.props.dataLabelTwo);
+    let fullX = elos;
+    let fullY = teamElos;
     let filteredNames = [];
     let filteredX = [];
     let filteredY = [];
     for (
       let i = 0;
-      i < dataSet.getRatingsArray(this.props.dataLabelOne).length;
+      i < elos.length;
       i++
     ) {
       if (fullX[i] !== undefined && fullY[i] !== undefined) {
