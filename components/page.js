@@ -67,6 +67,8 @@ export default class extends Component {
           color: "red",
         },
       },
+      showlegend: true,
+      name: `N = ${elos.filter(Boolean).length.toLocaleString()}`,
       hovermode: "x unified",
       hoveron: "points+fills",
     };
@@ -106,6 +108,7 @@ export default class extends Component {
       },
       marker: { color: DEFAULT_COLOR },
       hovermode: "false",
+      legend: {x: 1, y: 1, xanchor: 'right'},
     };
     let dataRandomMap = [traceRandomMap];
     let randomMapPlot = Plotly.newPlot(
@@ -131,6 +134,8 @@ export default class extends Component {
       marker: {
         color: DEFAULT_COLOR,
       },
+      showlegend: true,
+      name: `N = ${teamElos.filter(Boolean).length.toLocaleString()}`,
       hovertemplate:
         "# of Players: %{y}<br>Rating Range: %{x}<br>Percentile: %{text}<extra></extra>",
     };
@@ -168,6 +173,7 @@ export default class extends Component {
         },
         fixedrange: true,
       },
+      legend: {x: 1, y: 1, xanchor: 'right'},
     };
     let dataTeamRandomMap = [traceTeamRandomMap];
     let teamRandomMapPlot = Plotly.newPlot(
