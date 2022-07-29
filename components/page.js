@@ -53,6 +53,8 @@ export default class extends Component {
     const xmin = Math.min(...[...elos, ...teamElos].filter(Boolean)).clamp(0, Infinity);
     const xmax = Math.max(...[...elos, ...teamElos].filter(Boolean)).clamp(0, Infinity);
 
+    const xbins = {start: 0, end: 3500,size: 10}; // each bin covers 10 elo points
+
     // Random Map Histogram
     let traceRandomMap = {
       x: elos,
@@ -69,6 +71,8 @@ export default class extends Component {
       },
       showlegend: true,
       name: `N = ${elos.filter(Boolean).length.toLocaleString()}`,
+      autobinx:false,
+      xbins,
       hovermode: "x unified",
       hoveron: "points+fills",
     };
@@ -136,6 +140,8 @@ export default class extends Component {
       },
       showlegend: true,
       name: `N = ${teamElos.filter(Boolean).length.toLocaleString()}`,
+      autobinx:false,
+      xbins,
       hovertemplate:
         "# of Players: %{y}<br>Rating Range: %{x}<br>Percentile: %{text}<extra></extra>",
     };
