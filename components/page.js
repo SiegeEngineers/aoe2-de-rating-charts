@@ -54,6 +54,7 @@ export default class extends Component {
     const xmax = Math.max(...[...elos, ...teamElos].filter(Boolean)).clamp(0, Infinity);
 
     const xbins = {start: 0, end: 3500,size: 10}; // each bin covers 10 elo points
+    const soloPopSize = elos.filter(Boolean).length;
 
     // Random Map Histogram
     let traceRandomMap = {
@@ -70,8 +71,8 @@ export default class extends Component {
         },
       },
       showlegend: true,
-      name: `N = ${elos.filter(Boolean).length.toLocaleString()}`,
-      autobinx:false,
+      name: `N = ${soloPopSize.toLocaleString()}`,
+      autobinx: soloPopSize < 1000, // Deathmatch lacks enough samples to let manual binning look good
       xbins,
       hovermode: "x unified",
       hoveron: "points+fills",
@@ -132,6 +133,7 @@ export default class extends Component {
     for (let i = 0; i < histogramArray.length; i++) {
       teamRandomMapScores[i] = histogramArray[i][2];
     }
+    const teamPopSize = teamElos.filter(Boolean).length;
     let traceTeamRandomMap = {
       x: teamElos,
       type: "histogram",
@@ -139,8 +141,8 @@ export default class extends Component {
         color: DEFAULT_COLOR,
       },
       showlegend: true,
-      name: `N = ${teamElos.filter(Boolean).length.toLocaleString()}`,
-      autobinx:false,
+      name: `N = ${teamPopSize.toLocaleString()}`,
+      autobinx: teamPopSize < 1000,
       xbins,
       hovertemplate:
         "# of Players: %{y}<br>Rating Range: %{x}<br>Percentile: %{text}<extra></extra>",
