@@ -22,8 +22,8 @@
   "license": "ISC",
   "dependencies": {
     "functional-red-black-tree": "^1.0.1",
-    "got": "^10.6.0",
-    "next": "^11.1.2",
+    "got": "^12.3.0",
+    "next": "^12.2.3",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-select": "^3.1.0"

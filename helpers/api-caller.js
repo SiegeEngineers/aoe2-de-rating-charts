@@ -1,7 +1,7 @@
-const got = require("got");
 const fs = require("fs");
 
 import Utils from "../helpers/utils.js";
+import got from "got";
 
 const CACHE_DIRECTORY = "cache/";
 const CACHE_FILE_NAME = "ApiCache.json";
