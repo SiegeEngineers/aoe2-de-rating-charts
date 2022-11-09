@@ -7,7 +7,7 @@ const CACHE_DIRECTORY = "cache/";
 const CACHE_FILE_NAME = "ApiCache.json";
 const CACHE_EXPIRATION_IN_HOURS = 9999999; // Change this to 0 to bypass cache
 const API_CALL_CHUNK_SIZE = 200;
-const API_CALL_DELAY_IN_MS = 200;
+const API_CALL_DELAY_IN_MS = 300;
 
 const LEADERBOARD_LABELS = Utils.getLeaderboardLabels();
 const INVERTED_LEADERBOARD_LABELS = Utils.invert(LEADERBOARD_LABELS);
