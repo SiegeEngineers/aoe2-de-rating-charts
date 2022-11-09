@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import ApiCaller from "../helpers/api-caller.js";
+import ApiCaller from "../helpers/api-caller-relic.js";
 import Page from "../components/page.js";
 import Utils from "../helpers/utils.js";
 

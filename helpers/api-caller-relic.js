@@ -1,13 +1,13 @@
 const fs = require("fs");
 
-import Utils from "../helpers/utils.js";
+import Utils from "./utils.js";
 import got from "got";
 
 const CACHE_DIRECTORY = "cache/";
 const CACHE_FILE_NAME = "ApiCache.json";
 const CACHE_EXPIRATION_IN_HOURS = 9999999; // Change this to 0 to bypass cache
-const API_CALL_CHUNK_SIZE = 1000;
-const API_CALL_DELAY_IN_MS = 2000;
+const API_CALL_CHUNK_SIZE = 200;
+const API_CALL_DELAY_IN_MS = 200;
 
 const LEADERBOARD_LABELS = Utils.getLeaderboardLabels();
 const INVERTED_LEADERBOARD_LABELS = Utils.invert(LEADERBOARD_LABELS);
@@ -125,18 +125,19 @@ class ApiCaller {
           CACHE_EXPIRATION_IN_HOURS * 60 * 60 * 1000
       ) {
         console.log(
-          `Using cache file to avoid API calls to aoe2.net for leaderboard ${leaderboardId}...`
+          `Using cache file to avoid API calls to Relic for leaderboard ${leaderboardId}...`
         );
         leaderboard = JSON.parse(fs.readFileSync(CACHE_FILE_PATH, "utf8"));
       } else {
         console.log(
-          `Fetching data from aoe2.net for leaderboard ${leaderboardId}...`
+          `Fetching data from Relic for leaderboard ${leaderboardId}...`
         );
         let firstResponse = await got(
-          `https://aoe2.net/api/leaderboard?game=aoe2de&leaderboard_id=${leaderboardId}&start=1&count=1`
+          `https://aoe-api.reliclink.com/community/leaderboard/getLeaderBoard2?leaderboard_id=${leaderboardId}&title=age2&start=1&count=5`
         ).json();
-        let numberOfRankedPlayers = firstResponse.total;
+        let numberOfRankedPlayers = firstResponse.rankTotal;
 
+        // Override this for development
         let numberOfRequests = Math.ceil(
           numberOfRankedPlayers / API_CALL_CHUNK_SIZE
         );
@@ -149,8 +150,8 @@ class ApiCaller {
           "players"
         );
 
-        // The max number of leaderboard entries we can request is 1000, so we'll do it in chunks
-        // TODO: I think it's actually 10000 now
+        // The max number of leaderboard entries we can request from the Relic API is 200, so we'll do it in chunks
+        // They also use 1 indexing
         for (let i = 0; i < numberOfRequests; i++) {
           let startIndex = i * API_CALL_CHUNK_SIZE;
           console.log(
@@ -161,9 +162,34 @@ class ApiCaller {
           );
 
           let dataResponse = await got(
-            `https://aoe2.net/api/leaderboard?game=aoe2de&leaderboard_id=${leaderboardId}&start=${startIndex}&count=${API_CALL_CHUNK_SIZE}`
+            `https://aoe-api.reliclink.com/community/leaderboard/getLeaderBoard2?leaderboard_id=${leaderboardId}&title=age2&start=${
+              startIndex + 1
+            }&count=${API_CALL_CHUNK_SIZE}`
           ).json();
-          leaderboard = leaderboard.concat(dataResponse.leaderboard);
+
+          // Data comes back as an object. We need to merge the content of leaderboardStats and elements from statGroups into a single object
+          // However, they don't come back in the same order, for who knows what reason.
+
+          // Build lookup table to statsgroup
+          let statsGroups = {};
+          for (let statGroup of dataResponse.statGroups) {
+            statsGroups[statGroup.id] = statGroup;
+          }
+
+          // Do the merge
+          let mergedData = [];
+          for (let index in dataResponse.leaderboardStats) {
+            let statsGroup =
+              statsGroups[dataResponse.leaderboardStats[index].statgroup_id];
+            mergedData.push(
+              Object.assign(
+                dataResponse.leaderboardStats[index],
+                statsGroup.members[0]
+              )
+            );
+          }
+
+          leaderboard = leaderboard.concat(mergedData);
 
           // Wait a little bit between each api call. There are currently no API limits but we still want to respect the server.
           console.log("WAITING...");
@@ -200,7 +226,7 @@ class ApiCaller {
         data: {},
       };
       for (let i = 0; i < leaderboard.length; i++) {
-        let name = leaderboard[i].name;
+        let name = leaderboard[i].alias;
         let profileId = leaderboard[i].profile_id;
         let rating = leaderboard[i].rating;
         let leaderboardLabel = LEADERBOARD_LABELS[leaderboardId];

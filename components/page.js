@@ -711,8 +711,7 @@ export default class extends Component {
                 github
               </a>
               <br></br>
-              Data from{" "}
-              <a href="https://aoe2.net/#api">https://aoe2.net/#api</a>
+              {/*Data from{" "}<a href="https://aoe2.net/#api">https://aoe2.net/#api</a>*/}
             </div>
           </div>
         </body>
