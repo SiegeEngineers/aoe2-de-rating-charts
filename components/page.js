@@ -50,14 +50,9 @@ export default class extends Component {
     const teamElos = dataSet.getRatingsArray(this.props.dataLabelTwo);
 
     // Share xmin and xmax for all 3 graphs
-    const xmin = Math.min(...[...elos, ...teamElos].filter(Boolean)).clamp(
-      0,
-      Infinity
-    );
-    const xmax = Math.max(...[...elos, ...teamElos].filter(Boolean)).clamp(
-      0,
-      Infinity
-    );
+    let minMax = Utils.getMinAndMax([...elos, ...teamElos].filter(Boolean));
+    const xmin = minMax.min;
+    const xmax = minMax.max;
 
     const xbins = { start: 0, end: 3500, size: 10 }; // each bin covers 10 elo points
     const soloPopSize = elos.filter(Boolean).length;

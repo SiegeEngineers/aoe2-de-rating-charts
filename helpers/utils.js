@@ -79,6 +79,36 @@ class Utils {
 
     return lr;
   }
+
+  /**
+   * Math.min and Math.max can result in call stack overflows with large arrays.
+   *
+   * Also, when we need to calculate max and min at the same this saves us a trip through the array.
+   */
+  static getMinAndMax(arrayInput) {
+    if (arrayInput.length === 0) {
+      return {
+        max: 0,
+        min: 0,
+      };
+    } else {
+      let min = Number.MAX_SAFE_INTEGER;
+      let max = Number.MIN_SAFE_INTEGER;
+      for (let i = 0; i < arrayInput.length; i++) {
+        let value = arrayInput[i];
+        if (min > value) {
+          min = value;
+        }
+        if (max < value) {
+          max = value;
+        }
+      }
+      return {
+        max,
+        min,
+      };
+    }
+  }
 }
 
 export default Utils;
