@@ -133,7 +133,7 @@ class ApiCaller {
           `Fetching data from Relic for leaderboard ${leaderboardId}...`
         );
         let firstResponse = await got(
-          `https://aoe-api.reliclink.com/community/leaderboard/getLeaderBoard2?leaderboard_id=${leaderboardId}&title=age2&start=1&count=5`
+          `https://aoe-api.worldsedgelink.com/community/leaderboard/getLeaderBoard2?leaderboard_id=${leaderboardId}&title=age2&start=1&count=5`
         ).json();
         let numberOfRankedPlayers = firstResponse.rankTotal;
 
@@ -162,7 +162,7 @@ class ApiCaller {
           );
 
           let dataResponse = await got(
-            `https://aoe-api.reliclink.com/community/leaderboard/getLeaderBoard2?leaderboard_id=${leaderboardId}&title=age2&start=${
+            `https://aoe-api.worldsedgelink.com/community/leaderboard/getLeaderBoard2?leaderboard_id=${leaderboardId}&title=age2&start=${
               startIndex + 1
             }&count=${API_CALL_CHUNK_SIZE}`
           ).json();
