@@ -22,7 +22,7 @@
   "license": "ISC",
   "dependencies": {
     "functional-red-black-tree": "^1.0.1",
-    "got": "^12.3.0",
+    "got": "^12.5.3",
     "next": "^12.2.3",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
