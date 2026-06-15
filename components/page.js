@@ -696,6 +696,16 @@ export default class extends Component {
               <br></br>
               Players will only appear if they have played at least 10 ranked
               games and at least one ranked game in the last 28 days
+              {this.props.historyLink ? (
+                <span>
+                  <br></br>
+                  <br></br>
+                  See the number of rated players over time:{" "}
+                  <a href={this.props.historyLink}>
+                    {this.props.historyLinkText}
+                  </a>
+                </span>
+              ) : null}
               <br></br>
               <br></br>
               <a href="https://endlesswips.com/aoe2-de-rating-charts#ratings">

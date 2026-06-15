@@ -12,6 +12,7 @@
     "start": "next start",
     "pages": "next build & next export -o docs & touch ./docs/.nojekyll",
     "copy-ratings": "cp -rf ./ratings-ignored/. ./ratings/",
+    "update-history": "node scripts/update-history.js",
     "test": "echo 'no tests :('"
   },
   "repository": {

@@ -18,6 +18,8 @@ export default class extends Component {
         chartTwoLabel="Team Empire Wars"
         chartAltLink="/"
         chartAltLinkText="Random Map"
+        historyLink="/empire-wars-history"
+        historyLinkText="Empire Wars History"
         dataLabelOne={Labels.EMPIRE_WARS_RATING}
         dataLabelTwo={Labels.EMPIRE_WARS_TEAM_RATING}
         dataLabelThree={Labels.EMPIRE_WARS_COMBO_RATING}

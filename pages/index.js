@@ -18,6 +18,8 @@ export default class extends Component {
         chartTwoLabel="Team Random Map"
         chartAltLink="/empire-wars"
         chartAltLinkText="Empire Wars"
+        historyLink="/random-map-history"
+        historyLinkText="Random Map History"
         dataLabelOne={Labels.RANDOM_MAP_RATING}
         dataLabelTwo={Labels.TEAM_RANDOM_MAP_RATING}
         dataLabelThree={Labels.RANDOM_MAP_COMBO_RATING}
