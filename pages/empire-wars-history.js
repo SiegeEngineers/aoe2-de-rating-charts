@@ -38,9 +38,10 @@ export default class extends Component {
 /**
  * Runs at build time. This page is READ-ONLY: it reads the committed history
  * file, hides anomalous days, and renders. Today's point is appended once,
- * single-threaded, by scripts/update-history.js (run as a build step) — not
- * here — so the parallel page builds never fetch leaderboards twice or race
- * writing history.json. See scripts/update-history.js for details.
+ * single-threaded, by scripts/update-history.js (which runs between the two
+ * `next build` passes) — not here — so the parallel page builds never fetch
+ * leaderboards twice or race writing history.json, and the second build picks
+ * up today's point. See scripts/update-history.js for details.
  */
 export async function getStaticProps(context) {
   const soloKey = LEADERBOARDS.EMPIRE_WARS.solo;

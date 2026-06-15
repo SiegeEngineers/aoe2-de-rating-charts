@@ -19,12 +19,24 @@ jobs:
       - name: Install and Build
         run: |
           npm install
+          # Pass 1: fetch the leaderboards (the rating pages' getStaticProps),
+          # writing ratings-ignored/leaderboard*.json and warming the API cache.
+          npm run build
+          npm run copy-ratings
+          # Append today's point to ratings/history.json from the data pass 1
+          # just fetched. Must happen BEFORE the pages are exported so the
+          # history pages render with today included (and match the live main
+          # page). It can't live inside `next build` because pages render in
+          # parallel, so the history pages could render before the rating pages
+          # have written the leaderboard files.
+          npm run update-history
+          # Pass 2: re-render so the history pages pick up today's new point.
+          # The leaderboard fetches hit the warm cache from pass 1, so this
+          # makes NO additional API calls.
           npm run build
           npm run export
           npm run nojekyll
           npm run cname
-          npm run copy-ratings
-          npm run update-history
       - name: Commit files
         run: |
           git config --local user.email ${{ secrets.ACTION_BUILD_EMAIL }}

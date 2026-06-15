@@ -9,6 +9,14 @@
 // avoids both. It reuses the leaderboard JSON the rating pages already wrote to
 // ratings-ignored/ during `next build`, so it makes NO extra API calls.
 //
+// Build ordering (see build.yml): the workflow runs `next build` TWICE. Pass 1
+// fetches the leaderboards (writing ratings-ignored/*) and warms the API cache;
+// this script then runs to append today's point to history.json; pass 2
+// re-renders so the history pages include today's point (the leaderboard
+// fetches hit the warm cache, so pass 2 makes no extra API calls). Running this
+// between the two builds is what keeps the history pages in sync with the live
+// rating pages on the same deploy.
+//
 // This step must never break the build: on any problem it logs and exits 0,
 // leaving history.json unchanged (the next run will catch up).
 
