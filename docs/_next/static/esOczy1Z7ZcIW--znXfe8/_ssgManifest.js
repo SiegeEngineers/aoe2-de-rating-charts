@@ -1,1 +1,0 @@
-self.__SSG_MANIFEST=new Set(["\u002F","\u002Fdeathmatch","\u002Fembed","\u002Fempire-wars","\u002Fempire-wars-history","\u002Frandom-map-history"]);self.__SSG_MANIFEST_CB&&self.__SSG_MANIFEST_CB()
