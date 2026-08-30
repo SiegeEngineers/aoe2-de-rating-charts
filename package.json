@@ -28,5 +28,8 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-select": "^3.1.0"
+  },
+  "overrides": {
+    "http-cache-semantics": "4.1.1"
   }
 }
